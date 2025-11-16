@@ -1,0 +1,33 @@
+
+<section class="container">
+  <h2>Manage Menu</h2>
+
+  <form action="/admin/menu/add" method="POST" class="admin-form">
+    <input name="name" placeholder="Dish Name" required>
+    <input name="price" placeholder="Price" type="number" required>
+    <input name="img" placeholder="Image URL">
+    <select name="category">
+      <option value="snacks">Snacks</option>
+      <option value="main">Main Course</option>
+      <option value="breads">Breads</option>
+      <option value="dessert">Dessert</option>
+      <option value="drinks">Drinks</option>
+    </select>
+    <button type="submit">Add Dish</button>
+  </form>
+
+  <hr>
+
+  <h3>Existing Dishes</h3>
+
+ <ul>
+  <% menu.forEach(item => { %>
+      <li>
+        <strong><%= item.name %></strong> — ₹<%= item.price %> 
+        
+        <a class="edit-btn" href="/admin/menu/edit/<%= item._id %>">Edit</a>
+        <a class="delete-btn" href="/admin/menu/delete/<%= item._id %>">Delete</a>
+      </li>
+  <% }) %>
+</ul>
+</section>

@@ -1,0 +1,54 @@
+<section class="container order-history-page">
+
+  <h2 class="page-title">My Orders</h2>
+
+  <% if (orders.length === 0) { %>
+    <div class="empty-orders">
+      <p>You have not placed any orders yet.</p>
+      <a class="btn-primary" href="/menu">Order Now</a>
+    </div>
+  <% } %>
+
+  <% orders.forEach(order => { %>
+
+    <div class="order-card">
+
+      <div class="order-header">
+        <h3>Order #<%= order._id.toString().slice(-6) %></h3>
+        
+        <span class="status-badge <%= order.status.replace(/\s+/g, '-').toLowerCase() %>">
+          <%= order.status %>
+        </span>
+      </div>
+
+      <div class="order-items">
+        <% order.items.forEach(item => { %>
+          <div class="order-item-row">
+            <span><%= item.name %> (x<%= item.qty %>)</span>
+            <span>₹<%= item.price * item.qty %></span>
+          </div>
+        <% }) %>
+      </div>
+
+      <div class="order-footer">
+        <div class="order-meta">
+          <small><%= order.createdAt.toLocaleString() %></small>
+        </div>
+
+        <div class="order-total">
+          Total: <strong>₹<%= order.total %></strong>
+        </div>
+
+        <form action="/order" method="POST">
+          <input type="hidden" name="items" value='<%= JSON.stringify(order.items) %>'>
+          <input type="hidden" name="total" value="<%= order.total %>">
+          <button class="btn-secondary reorder-btn">Reorder</button>
+          <a href="/order/<%= order._id %>" class="btn-secondary">View Details</a>
+        </form>
+      </div>
+
+    </div>
+
+  <% }) %>
+
+</section>

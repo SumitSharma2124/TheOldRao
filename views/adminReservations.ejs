@@ -1,0 +1,36 @@
+<section class="container">
+  <h2>Manage Reservations</h2>
+
+  <table class="reservation-table">
+    <tr>
+      <th>Name</th>
+      <th>Phone</th>
+      <th>Guests</th>
+      <th>Date</th>
+      <th>Time</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+
+    <% reservations.forEach(r => { %>
+      <tr>
+        <td><%= r.name %></td>
+        <td><%= r.phone %></td>
+        <td><%= r.guests %></td>
+        <td><%= r.date %></td>
+        <td><%= r.time %></td>
+        <td><%= r.status %></td>
+        <td>
+
+          <a href="/admin/reservations/confirm/<%= r._id %>">Confirm</a> |
+          <a href="/admin/reservations/complete/<%= r._id %>">Complete</a> |
+          <a href="/admin/reservations/cancel/<%= r._id %>">Cancel</a> |
+          <a href="/admin/reservations/delete/<%= r._id %>">Delete</a>
+
+        </td>
+      </tr>
+    <% }) %>
+
+  </table>
+</section>
+

@@ -1,0 +1,29 @@
+
+<section class="menu-page container">
+    <!-- FILTER BAR -->
+    <div class="menu-filters">
+        <button class="filter-btn active" data-category="all">All</button>
+        <button class="filter-btn" data-category="snacks">Snacks</button>
+        <button class="filter-btn" data-category="main">Main Course</button>
+        <button class="filter-btn" data-category="breads">Breads</button>
+        <button class="filter-btn" data-category="dessert">Desserts</button>
+        <button class="filter-btn" data-category="drinks">Drinks</button>
+    </div>
+
+    <!-- MENU ITEMS WILL RENDER HERE -->
+    <div id="menuContainer" class="menu-grid"></div>
+</section>
+
+<div id="cartSidebar" class="cart-sidebar">
+    <div class="cart-header">
+        <h3>Your Cart</h3>
+        <button id="closeCart" class="close-btn">X</button>
+    </div>
+
+    <div id="cartItems" class="cart-items"></div>
+
+    <div class="cart-footer">
+        <p class="cart-total">Total: ₹<span id="cartTotal">0</span></p>
+        <a href="/checkout" id="goCheckoutBtn" class="checkout-btn">Checkout</a>
+    </div>
+</div>

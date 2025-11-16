@@ -1,0 +1,23 @@
+
+<section class="container reservation-page">
+  <h2>Reserve a Table</h2>
+
+  <form action="/reservation" method="POST" class="reservation-form">
+
+    <input type="text" name="name" placeholder="Your Name" required>
+
+    <input type="text" name="phone" placeholder="Phone Number" required>
+
+    <input type="number" name="guests" placeholder="Guests" required min="1">
+
+    <input type="date" name="date" required>
+
+    <input type="time" name="time" required>
+
+    <textarea name="message" placeholder="Special requests (optional)"></textarea>
+
+    <button type="submit" class="btn-primary">Book Table</button>
+
+  </form>
+
+</section>

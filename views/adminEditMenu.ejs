@@ -1,0 +1,41 @@
+
+<section class="container">
+  <h2>Edit Dish</h2>
+
+  <form action="/admin/menu/edit/<%= item._id %>" method="POST" class="admin-form">
+    
+    <input 
+      name="name" 
+      value="<%= item.name %>" 
+      placeholder="Dish Name"
+      required
+    >
+
+    <input 
+      name="price" 
+      type="number" 
+      value="<%= item.price %>" 
+      placeholder="Price"
+      required
+    >
+
+    <input 
+      name="img" 
+      value="<%= item.img %>" 
+      placeholder="Image URL"
+    >
+
+    <select name="category" required>
+      <option value="snacks"  <%= item.category === "snacks" ? "selected" : "" %> >Snacks</option>
+      <option value="main"    <%= item.category === "main" ? "selected" : "" %> >Main Course</option>
+      <option value="breads"  <%= item.category === "breads" ? "selected" : "" %> >Breads</option>
+      <option value="dessert" <%= item.category === "dessert" ? "selected" : "" %> >Dessert</option>
+      <option value="drinks"  <%= item.category === "drinks" ? "selected" : "" %> >Drinks</option>
+    </select>
+
+    <button type="submit">Save Changes</button>
+  </form>
+
+  <br>
+  <a href="/admin/menu">← Back to Menu Admin</a>
+</section>

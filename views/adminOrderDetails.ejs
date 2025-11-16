@@ -1,0 +1,54 @@
+<section class="container order-details-page">
+
+  <a href="/admin/orders" class="back-btn">← Back to Orders</a>
+
+  <h2>Order Details</h2>
+
+  <!-- ORDER SUMMARY CARD -->
+  <div class="order-card">
+
+    <h3>Order #<%= order._id %></h3>
+    <p><strong>Placed On:</strong> <%= order.createdAt.toLocaleString() %></p>
+
+    <hr>
+
+    <h3>Customer Info</h3>
+    <p><strong>Name:</strong> <%= order.name || "Guest" %></p>
+    <p><strong>Phone:</strong> <%= order.phone || "N/A" %></p>
+    <p><strong>Address:</strong> <%= order.address || "Pickup" %></p>
+
+    <hr>
+
+    <h3>Items Ordered</h3>
+    <ul class="item-list">
+      <% order.items.forEach(i => { %>
+        <li>
+          <span><%= i.name %> (x<%= i.qty %>)</span>
+          <span>₹<%= i.qty * i.price %></span>
+        </li>
+      <% }) %>
+    </ul>
+
+    <hr>
+
+    <h3>Payment Summary</h3>
+    <p><strong>Total:</strong> ₹<%= order.total %></p>
+    <p><strong>Payment Method:</strong> <%= order.payment || "N/A" %></p>
+
+    <hr>
+
+    <h3>Status</h3>
+    <div class="status-badge <%= order.status.toLowerCase().replaceAll(' ','-') %>">
+      <%= order.status %>
+    </div>
+
+    <div class="status-buttons">
+      <a href="/admin/orders/update/<%= order._id %>?status=Preparing" class="status-btn prepare">Preparing</a>
+      <a href="/admin/orders/update/<%= order._id %>?status=Out for Delivery" class="status-btn out">Out for Delivery</a>
+      <a href="/admin/orders/update/<%= order._id %>?status=Completed" class="status-btn complete">Completed</a>
+      <a href="/admin/orders/update/<%= order._id %>?status=Cancelled" class="status-btn cancel">Cancel</a>
+    </div>
+
+  </div>
+
+</section>

@@ -1,0 +1,33 @@
+
+<header class="site-header">
+  <div class="container header-flex">
+    <div class="logo">
+      <a href="/" class="logo-text">Old Rao</a>
+    </div>
+
+    <div class="right-actions">
+      <button class="icon-btn" id="cartBtn">🛒</button>
+      <div class="user-dropdown-wrapper">
+        <button class="icon-btn" id="userBtn">👤</button>
+
+        <div class="user-dropdown">
+
+          <% if (session && session.user) { %>
+
+            <p class="user-name">Hello, <%= session.user.name %></p>
+
+            <a href="/my-orders">My Orders</a>
+            <a href="/logout">Logout</a>
+
+          <% } else { %>
+
+            <a href="/login">Login</a>
+            <a href="/signup">Signup</a>
+
+          <% } %>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</header>

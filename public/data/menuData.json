@@ -1,0 +1,31 @@
+[
+  {
+    "id": 1,
+    "name": "Butter Chicken",
+    "price": 240,
+    "img": "/images/dish/dish1.jpg",
+    "category": "main"
+  },
+  {
+    "id": 2,
+    "name": "Paneer Tikka",
+    "price": 180,
+    "img": "/images/dish/dish2.jpg",
+    "category": "snacks"
+  },
+  {
+    "id": 3,
+    "name": "Garlic Naan",
+    "price": 40,
+    "img": "/images/dish/dish3.jpg",
+    "category": "breads"
+  },
+  {
+    "id": 4,
+    "name": "Gulab Jamun",
+    "price": 60,
+    "img": "/images/dish4.jpg",
+    "category": "dessert"
+  }
+]
+

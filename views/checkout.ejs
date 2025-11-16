@@ -1,0 +1,71 @@
+<section class="checkout container">
+
+  <h2 class="checkout-title">Checkout</h2>
+
+  <div class="checkout-wrapper">
+
+    <!-- LEFT: ORDER SUMMARY -->
+    <div class="checkout-card">
+
+      <h3>Your Order</h3>
+
+      <div id="checkoutItems"></div>
+
+      <div class="price-row">
+        <span>Subtotal</span>
+        <span>₹<span id="subtotal">0</span></span>
+      </div>
+
+      <div class="price-row">
+        <span>Delivery Fee</span>
+        <span>₹<span id="delivery">40</span></span>
+      </div>
+
+      <div class="price-row">
+        <span>Tax (5%)</span>
+        <span>₹<span id="tax">0</span></span>
+      </div>
+
+      <div class="tip-section">
+        <h4>Tip Your Delivery Partner</h4>
+
+        <div class="tip-options">
+          <button class="tip-btn" data-tip="20">₹20</button>
+          <button class="tip-btn" data-tip="40">₹40</button>
+          <button class="tip-btn" data-tip="60">₹60</button>
+          <button class="tip-btn" data-tip="0">No Tip</button>
+        </div>
+      </div>
+
+      <div class="price-row total-row">
+        <span>Total</span>
+        <span>₹<span id="grandTotal">0</span></span>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: ADDRESS + PAYMENT -->
+    <div class="checkout-card">
+
+      <h3>Delivery Details</h3>
+
+      <input class="checkout-input" id="custName" placeholder="Your Name" required>
+      <input class="checkout-input" id="custPhone" placeholder="Phone Number" required>
+      <textarea class="checkout-input" id="custAddress" placeholder="Delivery Address" required></textarea>
+
+      <h3>Payment Method</h3>
+
+      <select id="paymentMethod" class="checkout-input">
+        <option value="COD">Cash on Delivery</option>
+        <option value="UPI">UPI</option>
+        <option value="Card">Credit/Debit Card</option>
+      </select>
+
+      <button id="payNowBtn" class="pay-btn">Pay Now</button>
+
+    </div>
+
+  </div>
+
+</section>
+

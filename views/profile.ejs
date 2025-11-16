@@ -1,0 +1,17 @@
+<section class="container profile-page">
+  <h2>My Profile</h2>
+
+  <form action="/profile/update" method="POST" class="profile-form">
+    <label>Name</label>
+    <input type="text" name="name" value="<%= user.name %>" required>
+
+    <label>Email</label>
+    <input type="email" value="<%= user.email %>" disabled>
+
+    <label>Phone</label>
+    <input type="text" name="phone" value="<%= user.phone || '' %>">
+
+    <button class="btn-primary">Update Profile</button>
+  </form>
+</section>
+

@@ -1,0 +1,36 @@
+
+<section class="container">
+  <h2>Orders Dashboard</h2>
+
+  <table class="reservation-table">
+    <tr>
+      <th>Items</th>
+      <th>Total</th>
+      <th>Status</th>
+      <th>Time</th>
+      <th>Actions</th>
+    </tr>
+
+    <% orders.forEach(o => { %>
+      <tr>
+        <td>
+          <% o.items.forEach(i => { %>
+            <%= i.name %> (x<%= i.qty %>) <br>
+          <% }) %>
+        </td>
+
+        <td>₹<%= o.total %></td>
+        <td><%= o.status %></td>
+        <td><%= o.createdAt.toLocaleString() %></td>
+
+        <td>
+          
+          <a href="/admin/orders/details/<%= o._id %>">View Details</a>     
+        </td>
+
+      </tr>
+    <% }) %>
+
+  </table>
+
+</section>

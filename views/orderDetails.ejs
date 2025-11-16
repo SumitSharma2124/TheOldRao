@@ -1,0 +1,69 @@
+
+<section class="container order-details-page">
+
+  <h2 class="od-title">Order Details</h2>
+
+  <!-- Status badge -->
+  <div class="status-badge <%= order.status.toLowerCase().replace(/ /g,'-') %>">
+    <%= order.status %>
+  </div>
+
+  <!-- Order Timeline -->
+  <div class="timeline-box">
+    <div class="timeline-step <%= order.status !== 'Pending' ? 'active' : '' %>">
+      <span class="circle"></span>
+      <p>Pending</p>
+    </div>
+
+    <div class="timeline-step <%= order.status === 'Preparing' || order.status === 'Out for Delivery' || order.status === 'Completed' ? 'active' : '' %>">
+      <span class="circle"></span>
+      <p>Preparing</p>
+    </div>
+
+    <div class="timeline-step <%= order.status === 'Out for Delivery' || order.status === 'Completed' ? 'active' : '' %>">
+      <span class="circle"></span>
+      <p>Out for Delivery</p>
+    </div>
+
+    <div class="timeline-step <%= order.status === 'Completed' ? 'active' : '' %>">
+      <span class="circle"></span>
+      <p>Delivered</p>
+    </div>
+  </div>
+
+  <!-- Order Items Card -->
+  <div class="order-card">
+    <h3>Items</h3>
+    <hr>
+
+    <% order.items.forEach(i => { %>
+      <div class="item-row">
+        <span><%= i.name %> (x<%= i.qty %>)</span>
+        <strong>₹<%= i.price * i.qty %></strong>
+      </div>
+    <% }) %>
+
+    <hr>
+
+    <div class="item-row">
+      <span><strong>Total</strong></span>
+      <strong>₹<%= order.total %></strong>
+    </div>
+  </div>
+
+  <!-- Delivery Info -->
+  <div class="order-card">
+    <h3>Delivery Details</h3>
+    <p><strong>Name:</strong> <%= order.name %></p>
+    <p><strong>Phone:</strong> <%= order.phone %></p>
+    <p><strong>Address:</strong> <%= order.address %></p>
+    <p><strong>Payment:</strong> <%= order.payment %></p>
+  </div>
+
+  <!-- Footer Actions -->
+  <div class="order-actions">
+    <a href="/my-orders" class="btn-secondary">← Back to Orders</a>
+    <a href="/menu" class="btn-primary reorder-btn">Reorder</a>
+  </div>
+
+</section>
