@@ -15,7 +15,7 @@ body { background: var(--bg); }
 .container { max-width: 1100px; margin: 0 auto; padding: 5px; }
 
 /* Checkout section sizing to prevent collapsing near footer */
-section.checkout { min-height: 72vh; display: flex; flex-direction: column; margin-top: 28px; }
+section.checkout { min-height: 72vh; display: flex; flex-direction: column; margin-top: 28px; padding-bottom: 220px; }
 
 .checkout-header { margin: 8px 0 20px; text-align: center; }
 .checkout-title { font-family: 'Playfair Display', serif; color: var(--ink); font-size: 34px; margin: 0; letter-spacing: .3px; }
@@ -48,8 +48,8 @@ section.checkout { min-height: 72vh; display: flex; flex-direction: column; marg
 .checkout-input.full { grid-column: 1/-1; min-height: 100px; resize: vertical; }
 .space-top { margin-top: 12px; }
 
-/* Sticky bottom bar */
-.sticky-bar { position: static; bottom: 0; left: 0; right: 0; display:flex; align-items:center; gap: 16px; background: rgba(255,250,243,0.95); border: 1px solid #eee2d4; border-radius: 14px; padding: 12px 16px; margin-top: 24px; margin-bottom: 24px; backdrop-filter: blur(6px); box-shadow: 0 -4px 18px rgba(0,0,0,0.06); }
+/* Sticky bottom bar: sticks above footer, not overlapping */
+.sticky-bar { position: -webkit-sticky; position: sticky; bottom: 24px; left: 0; right: 0; display:flex; align-items:center; gap: 16px; background: rgba(255,250,243,0.95); border: 1px solid #eee2d4; border-radius: 14px; padding: 12px 16px; margin-top: 24px; margin-bottom: 48px; backdrop-filter: blur(6px); box-shadow: 0 -4px 18px rgba(0,0,0,0.06); z-index: 100; }
 .sticky-info { display:flex; flex-direction: column; }
 .sticky-info .label { font-size: 12px; color: var(--muted); }
 .sticky-info .amount { font-size: 22px; font-weight: 700; color: var(--ink); }
