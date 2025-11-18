@@ -17,44 +17,15 @@ const ContactMessage = require("./models/ContactMessage");
 
 const app = express();
 
-// Dev safety nets: avoid process crash loops while diagnosing DB issues
-process.on('unhandledRejection', (reason) => {
-  console.error('Unhandled Promise Rejection:', reason);
-});
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err);
-});
-
-/* ---------------------------------------------
-   SECURITY & PERFORMANCE MIDDLEWARE (added for prod)
----------------------------------------------- */
-const helmet = require('helmet');
-const compression = require('compression');
-const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
-// trust proxy when behind Render's proxy so secure cookies work
-app.set('trust proxy', 1);
-app.use(helmet());
-app.use(compression());
-// Basic request logging (use 'combined' in production for more detail)
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
-// Rate limit login & contact style endpoints (placeholder pattern)
-const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false });
-app.use(['/login','/signup'], authLimiter);
-
 // Environment configuration
 const SESSION_SECRET = process.env.SESSION_SECRET || 'dev_fallback_secret';
 const MONGO_URL = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017/oldrao';
 const PORT = process.env.PORT || 3000;
 // Optional debug flag to relax TLS in dev if corporate antivirus/proxy interferes
 const MONGO_TLS_INSECURE = String(process.env.MONGO_TLS_INSECURE || '').toLowerCase() === 'true';
-// Enable Atlas Server API v1 for stable behavior
-const mongoClientOptions = {
-  serverApi: { version: '1', strict: true, deprecationErrors: true }
-};
+const mongoClientOptions = {};
 if (MONGO_TLS_INSECURE) {
-  // Use only tlsInsecure; do not combine with tlsAllowInvalidCertificates
-  mongoClientOptions.tlsInsecure = true;
+  mongoClientOptions.tlsAllowInvalidCertificates = true;
 }
 
 /* ---------------------------------------------
@@ -101,30 +72,25 @@ mongoose
 /* ---------------------------------------------
    SESSION CONFIG
 ---------------------------------------------- */
-// Initialize session store with error handler; fall back to MemoryStore if creation fails (dev only)
-let sessionStore;
-try {
-  sessionStore = MongoStore.create({ mongoUrl: MONGO_URL, mongoOptions: mongoClientOptions });
-  sessionStore.on('error', (err) => {
-    console.error('Session store error:', err);
-  });
-} catch (err) {
-  console.error('Failed to initialize Mongo session store. Falling back to MemoryStore (dev only).', err);
-}
+// Initialize session store with error handler to avoid process crash on connection errors
+const sessionStore = MongoStore.create({ mongoUrl: MONGO_URL, mongoOptions: mongoClientOptions });
+sessionStore.on('error', (err) => {
+  console.error('Session store error:', err);
+});
 
-const sessionOptions = {
-  secret: SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    maxAge: 1000 * 60 * 60 * 24, // 1 day
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'strict'
-  }
-};
-if (sessionStore) sessionOptions.store = sessionStore;
-
-app.use(session(sessionOptions));
+app.use(
+  session({
+    secret: SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    store: sessionStore,
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'strict'
+    },
+  })
+);
 
 // Make session available in all views (always define to avoid ReferenceError in EJS)
 app.use((req, res, next) => {
@@ -143,7 +109,7 @@ app.use((req, res, next) => {
 
     const path = req.path || '';
     // Allow admin routes, logout, and SSE admin channel
-    const allowed = path.startsWith('/admin') || path.startsWith('/events/admin') || path === '/logout' || path === '/healthz';
+    const allowed = path.startsWith('/admin') || path.startsWith('/events/admin') || path === '/logout';
 
     // Only redirect for primary page navigations (HTML)
     const acceptsHtml = (req.headers.accept || '').includes('text/html');
