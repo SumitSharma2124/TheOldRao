@@ -1,0 +1,74 @@
+/* Modern Rustic Checkout Styles */
+:root {
+  --bg:#faf7f2;
+  --paper:#fffaf3;
+  --ink:#2c2620;
+  --muted:#786b5e;
+  --brand:#9f6b3f;
+  --brand-dark:#7f552f;
+  --accent:#d6b08c;
+  --ok:#1a9c5a;
+}
+
+body { background: var(--bg); }
+
+.container { max-width: 1100px; margin: 0 auto; padding: 5px; }
+
+/* Checkout section sizing to prevent collapsing near footer */
+section.checkout { min-height: 72vh; display: flex; flex-direction: column; margin-top: 28px; }
+
+.checkout-header { margin: 8px 0 20px; text-align: center; }
+.checkout-title { font-family: 'Playfair Display', serif; color: var(--ink); font-size: 34px; margin: 0; letter-spacing: .3px; }
+.checkout-sub { color: var(--muted); margin-top: 6px; font-size: 14px; }
+
+.checkout-wrapper { display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; align-items: start; }
+
+.checkout-card { background: var(--paper); border: 1px solid #eee2d4; border-radius: 14px; padding: 18px; box-shadow: 0 6px 20px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+.card-head h3 { margin: 0 0 10px; font-size: 18px; color: var(--ink); }
+
+.items-list { max-height: 300px; overflow: auto; padding-right: 6px; margin-bottom: 8px; }
+.items-list::-webkit-scrollbar { width: 6px; }
+.items-list::-webkit-scrollbar-thumb { background: #e0d4c7; border-radius: 6px; }
+
+.price-row { display:flex; justify-content:space-between; padding: 10px 0; color: var(--ink); border-bottom: 1px dashed #eadfce; font-variant-numeric: tabular-nums; }
+.price-row:last-of-type { border-bottom: none; }
+.total-row { font-weight: 600; font-size: 18px; padding-top: 14px; }
+
+.tip-section { margin-top: 8px; }
+.tip-section h4 { margin: 10px 0 8px; font-size: 12px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .6px; }
+.tip-options { display:flex; gap: 8px; flex-wrap: wrap; }
+.tip-btn { border: 1px solid #e1d6c8; background: #fff; padding: 8px 12px; border-radius: 999px; cursor: pointer; transition: .2s; }
+.tip-btn:hover { border-color: var(--brand); color: var(--brand-dark); }
+.tip-btn.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+
+.form-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-grid .checkout-input { box-sizing: border-box; }
+.checkout-input { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid #e3d9cc; background: #fff; outline: none; color: var(--ink); }
+.checkout-input:focus { border-color: var(--brand); box-shadow: 0 0 0 4px rgba(159,107,63,0.08); }
+.checkout-input.full { grid-column: 1/-1; min-height: 100px; resize: vertical; }
+.space-top { margin-top: 12px; }
+
+/* Sticky bottom bar */
+.sticky-bar { position: static; bottom: 0; left: 0; right: 0; display:flex; align-items:center; gap: 16px; background: rgba(255,250,243,0.95); border: 1px solid #eee2d4; border-radius: 14px; padding: 12px 16px; margin-top: 24px; margin-bottom: 24px; backdrop-filter: blur(6px); box-shadow: 0 -4px 18px rgba(0,0,0,0.06); }
+.sticky-info { display:flex; flex-direction: column; }
+.sticky-info .label { font-size: 12px; color: var(--muted); }
+.sticky-info .amount { font-size: 22px; font-weight: 700; color: var(--ink); }
+
+.pay-btn { background: var(--brand); color: #fff; border: none; border-radius: 12px; padding: 14px 20px; font-weight: 600; cursor: pointer; transition: transform .15s ease, background .2s ease; flex: 1; min-width: 260px; }
+.pay-btn:hover { background: var(--brand-dark); transform: translateY(-1px); }
+.pay-btn:active { transform: translateY(0); }
+.pay-btn[disabled] { opacity: .6; cursor: not-allowed; filter: grayscale(.1); }
+
+/* CTA bounce micro-animation */
+.bounce { animation: gentleBounce 2.6s ease-in-out infinite; }
+@keyframes gentleBounce { 0%,100%{ transform: translateY(0)} 50%{ transform: translateY(-2px)} }
+
+/* Responsive */
+@media (max-width: 920px) {
+  .checkout-wrapper { grid-template-columns: 1fr; }
+  .items-list { max-height: 220px; }
+  section.checkout { min-height: 68vh; }
+}
+
+/* Inputs */
+.checkout-input::placeholder { color: #b3a69a; }

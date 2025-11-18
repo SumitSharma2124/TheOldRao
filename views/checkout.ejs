@@ -1,15 +1,20 @@
-<section class="checkout container">
+<%- contentFor('styles') %>
+<link rel="stylesheet" href="/css/checkout.css">
 
-  <h2 class="checkout-title">Checkout</h2>
+<section class="checkout container">
+  <div class="checkout-header">
+    <h2 class="checkout-title">Your Checkout</h2>
+    <p class="checkout-sub">Almost there — deliciousness is minutes away.</p>
+  </div>
 
   <div class="checkout-wrapper">
-
     <!-- LEFT: ORDER SUMMARY -->
     <div class="checkout-card">
+      <div class="card-head">
+        <h3>Your Order</h3>
+      </div>
 
-      <h3>Your Order</h3>
-
-      <div id="checkoutItems"></div>
+      <div id="checkoutItems" class="items-list"></div>
 
       <div class="price-row">
         <span>Subtotal</span>
@@ -28,44 +33,51 @@
 
       <div class="tip-section">
         <h4>Tip Your Delivery Partner</h4>
-
         <div class="tip-options">
           <button class="tip-btn" data-tip="20">₹20</button>
           <button class="tip-btn" data-tip="40">₹40</button>
           <button class="tip-btn" data-tip="60">₹60</button>
-          <button class="tip-btn" data-tip="0">No Tip</button>
+          <button class="tip-btn active" data-tip="0">No Tip</button>
         </div>
       </div>
 
       <div class="price-row total-row">
         <span>Total</span>
-        <span>₹<span id="grandTotal">0</span></span>
+        <span>₹<span id="grandTotalCard">0</span></span>
       </div>
-
     </div>
 
     <!-- RIGHT: ADDRESS + PAYMENT -->
     <div class="checkout-card">
+      <div class="card-head">
+        <h3>Delivery Details</h3>
+      </div>
 
-      <h3>Delivery Details</h3>
+      <div class="form-grid">
+        <input class="checkout-input" id="custName" placeholder="Your Name" required>
+        <input class="checkout-input" id="custPhone" placeholder="Phone Number" required>
+        <textarea class="checkout-input full" id="custAddress" placeholder="Delivery Address" required></textarea>
+      </div>
 
-      <input class="checkout-input" id="custName" placeholder="Your Name" required>
-      <input class="checkout-input" id="custPhone" placeholder="Phone Number" required>
-      <textarea class="checkout-input" id="custAddress" placeholder="Delivery Address" required></textarea>
-
-      <h3>Payment Method</h3>
+      <div class="card-head space-top">
+        <h3>Payment Method</h3>
+      </div>
 
       <select id="paymentMethod" class="checkout-input">
         <option value="COD">Cash on Delivery</option>
         <option value="UPI">UPI</option>
         <option value="Card">Credit/Debit Card</option>
       </select>
-
-      <button id="payNowBtn" class="pay-btn">Pay Now</button>
-
     </div>
-
   </div>
 
+  <!-- Sticky bottom bar -->
+  <div class="sticky-bar">
+    <div class="sticky-info">
+      <span class="label">Payable</span>
+      <span class="amount">₹<span id="grandTotalSticky">0</span></span>
+    </div>
+    <button id="payNowBtn" class="pay-btn bounce">Place Order</button>
+  </div>
 </section>
 

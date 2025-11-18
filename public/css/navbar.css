@@ -1,0 +1,44 @@
+/* Navbar Styles (extracted from style.css) */
+.main-nav {
+  background: #C44536;
+  position: fixed;
+  top: var(--header-h);
+  left: 0;
+  right: 0;
+  z-index: 999;
+  height: var(--nav-h);
+}
+.main-nav ul {
+  margin: 0;
+  padding: 10px 10px 8px;
+  display: flex;
+  list-style: none;
+  justify-content: center;
+  gap: 20px;
+  height: 100%;
+  box-sizing: border-box;
+}
+.main-nav a {
+  color: #ffffff;
+  text-decoration: none;
+  font-family: 'Montserrat', 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: .6px;
+  position: relative;
+  transition: color .18s ease;
+}
+.main-nav a::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 0;
+  height: 2px;
+  background: #fff;
+  transform: translateX(-50%);
+  transition: width .25s ease;
+  border-radius: 2px;
+}
+.main-nav a:hover::after { width: 60%; }
+.main-nav a:hover { color: #ffe8e4; }

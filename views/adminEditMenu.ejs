@@ -2,40 +2,72 @@
 <section class="container">
   <h2>Edit Dish</h2>
 
-  <form action="/admin/menu/edit/<%= item._id %>" method="POST" class="admin-form">
-    
-    <input 
-      name="name" 
-      value="<%= item.name %>" 
-      placeholder="Dish Name"
-      required
-    >
-
-    <input 
-      name="price" 
-      type="number" 
-      value="<%= item.price %>" 
-      placeholder="Price"
-      required
-    >
-
-    <input 
-      name="img" 
-      value="<%= item.img %>" 
-      placeholder="Image URL"
-    >
-
-    <select name="category" required>
-      <option value="snacks"  <%= item.category === "snacks" ? "selected" : "" %> >Snacks</option>
-      <option value="main"    <%= item.category === "main" ? "selected" : "" %> >Main Course</option>
-      <option value="breads"  <%= item.category === "breads" ? "selected" : "" %> >Breads</option>
-      <option value="dessert" <%= item.category === "dessert" ? "selected" : "" %> >Dessert</option>
-      <option value="drinks"  <%= item.category === "drinks" ? "selected" : "" %> >Drinks</option>
-    </select>
-
-    <button type="submit">Save Changes</button>
-  </form>
+  <div class="add-card">
+    <form action="/admin/menu/edit/<%= item._id %>" method="POST" class="admin-form" enctype="multipart/form-data" id="editMenuForm">
+      <div class="grid">
+        <label>
+          <span>Dish Name*</span>
+          <input name="name" value="<%= item.name %>" placeholder="Dish Name" required>
+        </label>
+        <label>
+          <span>Price (₹)*</span>
+          <input name="price" type="number" value="<%= item.price %>" placeholder="Price" min="0" step="0.01" required>
+        </label>
+        <label>
+          <span>Category*</span>
+          <select name="category" required>
+            <option value="snacks"  <%= item.category === "snacks" ? "selected" : "" %> >Snacks</option>
+            <option value="main"    <%= item.category === "main" ? "selected" : "" %> >Main Course</option>
+            <option value="breads"  <%= item.category === "breads" ? "selected" : "" %> >Breads</option>
+            <option value="dessert" <%= item.category === "dessert" ? "selected" : "" %> >Dessert</option>
+            <option value="drinks"  <%= item.category === "drinks" ? "selected" : "" %> >Drinks</option>
+          </select>
+        </label>
+        <label>
+          <span>Image URL (optional)</span>
+          <input name="img" value="<%= item.img %>" placeholder="https://...">
+        </label>
+        <label class="full">
+          <span>Or Upload Image</span>
+          <input type="file" name="image" id="imageInput" accept="image/*">
+        </label>
+      </div>
+      <div class="preview-wrap">
+        <img id="imgPreview" src="<%= item.img %>" alt="Preview">
+      </div>
+      <button type="submit" class="btn-primary">Save Changes</button>
+    </form>
+  </div>
 
   <br>
   <a href="/admin/menu">← Back to Menu Admin</a>
+
+  <style>
+    .add-card { background:#fff; border:1px solid #eee; border-radius:14px; box-shadow: var(--card-shadow, 0 6px 24px rgba(0,0,0,.06)); padding:16px; margin-bottom:16px; }
+    .admin-form .grid { display:grid; grid-template-columns: repeat( auto-fit, minmax(220px, 1fr) ); gap:12px; }
+    .admin-form label { display:flex; flex-direction:column; }
+    .admin-form label span { font-size:12px; opacity:.7; margin-bottom:6px; }
+    .admin-form input, .admin-form select { padding:10px 12px; border:1px solid #ddd; border-radius:10px; }
+    .admin-form .full { grid-column: 1 / -1; }
+    .preview-wrap { margin:12px 0; }
+    #imgPreview { width:160px; height:120px; object-fit:cover; border-radius:10px; border:1px solid #eee; }
+    .btn-primary { padding:8px 12px; border-radius:10px; text-decoration:none; display:inline-block; }
+  </style>
+
+  <script>
+    (function(){
+      const urlInput = document.querySelector('input[name="img"]');
+      const fileInput = document.getElementById('imageInput');
+      const preview = document.getElementById('imgPreview');
+      function setPreview(src){ if (!src) return; preview.src = src; }
+      urlInput?.addEventListener('input', ()=> setPreview(urlInput.value));
+      fileInput?.addEventListener('change', ()=>{
+        const f = fileInput.files && fileInput.files[0];
+        if (!f) return;
+        const reader = new FileReader();
+        reader.onload = e => setPreview(e.target.result);
+        reader.readAsDataURL(f);
+      });
+    })();
+  </script>
 </section>

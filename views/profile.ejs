@@ -1,17 +1,86 @@
 <section class="container profile-page">
-  <h2>My Profile</h2>
+  <h2 class="profile-title">My Profile</h2>
 
-  <form action="/profile/update" method="POST" class="profile-form">
-    <label>Name</label>
-    <input type="text" name="name" value="<%= user.name %>" required>
+  <div class="profile-layout">
+    <!-- Overview Panel -->
+    <div class="panel overview-panel">
+      <div class="avatar" id="pfAvatar" aria-hidden="true">?</div>
+      <h3 class="pf-name"><%= user.name %></h3>
+      <div class="role-badge"><%= user.role || 'customer' %></div>
+      <div class="key-line"><i data-lucide="mail"></i> <span><%= user.email %></span></div>
+      <div class="stats">
+        <div class="stat"><i data-lucide="shopping-bag"></i><span><%= orderCount || 0 %> Orders</span></div>
+        <div class="stat"><i data-lucide="phone"></i><span><%= (user.phone||'No phone added') %></span></div>
+      </div>
+    </div>
 
-    <label>Email</label>
-    <input type="email" value="<%= user.email %>" disabled>
+    <!-- Details/Edit Panel (hidden for admins edit-wise) -->
+    <div class="panel edit-panel">
+      <% if (user.role !== 'admin') { %>
+        <form action="/profile/update" method="POST" class="edit-form" autocomplete="on">
+          <div class="field">
+            <label for="pfName">Full name</label>
+            <input id="pfName" type="text" name="name" value="<%= user.name %>" required>
+          </div>
+          <div class="field">
+            <label for="pfPhone">Phone</label>
+            <input id="pfPhone" type="tel" name="phone" value="<%= user.phone || '' %>" placeholder="e.g. 9876543210">
+          </div>
+          <button class="btn-primary" type="submit">Save changes</button>
+        </form>
+      <% } else { %>
+        <div class="admin-note">Admin accounts cannot be edited here. Manage roles in the Admin Users page.</div>
+      <% } %>
 
-    <label>Phone</label>
-    <input type="text" name="phone" value="<%= user.phone || '' %>">
+      <div class="security-block">
+        <h4 class="sec-title"><i data-lucide="lock"></i> Security</h4>
+        <p class="muted">Need to update your password? This placeholder section can be wired to a reset route later.</p>
+        <button class="btn-light" type="button" disabled>Change Password (Coming Soon)</button>
+      </div>
+    </div>
+  </div>
 
-    <button class="btn-primary">Update Profile</button>
-  </form>
+  <style>
+    .profile-title { font-family:'Playfair Display', serif; margin:0 0 18px; }
+    .profile-layout { display:grid; grid-template-columns: 320px 1fr; gap: 24px; align-items:start; }
+    .panel { background:#fff; border:1px solid #eee; border-radius:18px; padding:20px; box-shadow: var(--card-shadow); }
+    .overview-panel { text-align:center; display:flex; flex-direction:column; align-items:center; gap:12px; }
+    .avatar { width:96px; height:96px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; color:#fff; background: var(--primary); border:4px solid #fff; box-shadow: 0 6px 18px rgba(0,0,0,.1); font-size:30px; text-transform:uppercase; }
+    .role-badge { background:#f4f6f8; border:1px solid #e2e6ea; padding:6px 14px; border-radius:999px; font-size:.75rem; text-transform:uppercase; letter-spacing:.5px; font-weight:600; }
+    .key-line { display:flex; align-items:center; gap:8px; font-size:.9rem; opacity:.85; }
+    .key-line i { width:18px; height:18px; }
+    .stats { display:flex; flex-direction:column; gap:8px; margin-top:10px; width:100%; }
+    .stat { display:flex; align-items:center; gap:8px; font-size:.85rem; background:#fafafa; border:1px solid #eee; padding:8px 10px; border-radius:12px; }
+    .stat i { width:18px; height:18px; }
+
+    .edit-panel { display:flex; flex-direction:column; gap:26px; }
+    .edit-form { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+    .edit-form .field { display:flex; flex-direction:column; gap:6px; grid-column: span 1; }
+    .edit-form .field:nth-child(1){ grid-column: span 2; }
+    .edit-form label { font-size:.8rem; font-weight:600; opacity:.75; }
+    .edit-form input { padding:11px 12px; border:1px solid #d0d5dd; border-radius:10px; font-size:.9rem; }
+    .edit-form button { grid-column: span 2; width:max-content; }
+    .admin-note { background:#fff8e1; border:1px solid #ffe4a6; padding:14px; border-radius:12px; font-size:.85rem; }
+    .security-block { background:#fafafa; border:1px solid #eee; padding:16px; border-radius:14px; display:flex; flex-direction:column; gap:8px; }
+    .sec-title { display:flex; align-items:center; gap:8px; margin:0; font-size:1rem; font-weight:600; }
+    .sec-title i { width:18px; height:18px; }
+    .btn-light { padding:10px 14px; border-radius:10px; background:#f5f5f5; border:1px solid #e0e0e0; cursor:not-allowed; font-size:.85rem; }
+    .muted { opacity:.7; font-size:.8rem; }
+
+    @media (max-width: 900px){ .profile-layout { grid-template-columns: 1fr; } .edit-form { grid-template-columns:1fr; } .edit-form .field:nth-child(1){ grid-column: span 1; } }
+    section.container.profile-page { margin-bottom:28px; }
+  </style>
+
+  <script>
+    (function(){
+      try {
+        const name = `<%= (user.name||'').trim() %>`;
+        const a = document.getElementById('pfAvatar');
+        const ini = name ? name.split(/\s+/).map(p=>p[0]).slice(0,2).join('').toUpperCase() : '?';
+        a.textContent = ini || '?';
+        if (window.lucide) window.lucide.createIcons();
+      } catch(e){}
+    })();
+  </script>
 </section>
 

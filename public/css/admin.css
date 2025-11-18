@@ -1,0 +1,24 @@
+:root {
+  --admin-gap: 14px;
+}
+
+.admin-header { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+.admin-sub { opacity:.75; }
+
+.admin-grid { display:grid; grid-template-columns: repeat( auto-fit, minmax(220px, 1fr) ); gap: var(--admin-gap); }
+
+.admin-card { background:#fff; border:1px solid #eee; border-radius:14px; box-shadow: var(--card-shadow, 0 6px 24px rgba(0,0,0,.06)); padding:16px; display:flex; gap:12px; align-items:flex-start; transition: transform .12s ease, box-shadow .12s ease; text-decoration:none; color:inherit; }
+.admin-card:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,.08); }
+.admin-card .ico { width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:22px; background:#f6f7f9; }
+.admin-card h3 { margin:0; font-size:18px; }
+.admin-card .desc { font-size:12px; opacity:.7; }
+.admin-card .stat { margin-left:auto; font-weight:700; font-size:20px; }
+
+.quick-links { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+.quick-links a { padding:6px 10px; border-radius:10px; border:1px solid #ddd; background:#fff; text-decoration:none; }
+
+.section { margin-top:22px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-card { transition: none; }
+}

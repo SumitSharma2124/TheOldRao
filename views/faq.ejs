@@ -1,0 +1,46 @@
+<section class="container">
+  <h2 style="margin-bottom:12px;">Frequently Asked Questions</h2>
+  <p style="margin-bottom:20px; opacity:.8;">Quick answers to common questions. Need more help? Contact us.</p>
+
+  <div id="faq" class="faq"></div>
+
+  <style>
+    .faq-item { border:1px solid #eee; border-radius:12px; background:#fff; margin-bottom:10px; overflow:hidden; box-shadow: var(--card-shadow, 0 6px 24px rgba(0,0,0,.06)); }
+    .faq-q { width:100%; text-align:left; padding:14px 16px; font-weight:600; background:#fafbfc; border:0; outline:none; display:flex; align-items:center; justify-content:space-between; }
+    .faq-a { padding:0 16px 14px 16px; display:none; color:#333; }
+    .faq-item.open .faq-a { display:block; }
+    .faq-item.open .faq-q { background:#f4f6f8; }
+    .chev { transition: transform .2s ease; }
+    .faq-item.open .chev { transform: rotate(90deg); }
+  </style>
+
+  <script>
+    (async function(){
+      try {
+        const wrap = document.getElementById('faq');
+        const res = await fetch('/data/faq.json');
+        const faqs = await res.json();
+        function itemTemplate(it, idx){
+          return `
+            <div class="faq-item" aria-expanded="false">
+              <button class="faq-q" aria-controls="faq-${idx}" aria-expanded="false">
+                <span>${it.q}</span>
+                <span class="chev">▶</span>
+              </button>
+              <div id="faq-${idx}" class="faq-a" role="region">${it.a}</div>
+            </div>`;
+        }
+        wrap.innerHTML = faqs.map(itemTemplate).join('');
+
+        wrap.querySelectorAll('.faq-q').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const parent = btn.closest('.faq-item');
+            const open = parent.classList.toggle('open');
+            parent.setAttribute('aria-expanded', open);
+            btn.setAttribute('aria-expanded', open);
+          });
+        });
+      } catch(e) { console.log(e); }
+    })();
+  </script>
+</section>

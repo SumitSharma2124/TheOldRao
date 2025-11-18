@@ -1,0 +1,97 @@
+<section class="container">
+  <h2 style="margin-bottom:12px;">Customer Reviews</h2>
+  <p style="margin-bottom:20px; opacity:.8;">Real feedback from our diners. Thanks for sharing the love!</p>
+
+  <div class="reviews-summary" id="reviewsSummary" style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
+    <div class="score" style="font-size:36px; font-weight:700;">–</div>
+    <div>
+      <div class="stars" aria-label="Average rating" style="font-size:20px;"></div>
+      <div class="count" style="opacity:.7; font-size:12px;">–</div>
+    </div>
+    <div style="margin-left:auto; display:flex; gap:8px; align-items:center;">
+      <strong style="margin-right:4px;">Filter:</strong>
+      <button class="filter-btn active" data-rating="all">All</button>
+      <button class="filter-btn" data-rating="5">5★</button>
+      <button class="filter-btn" data-rating="4">4★</button>
+      <button class="filter-btn" data-rating="3">3★</button>
+      <button class="filter-btn" data-rating="2">2★</button>
+      <button class="filter-btn" data-rating="1">1★</button>
+    </div>
+  </div>
+
+  <div class="reviews-list" id="reviewsList"></div>
+
+  <style>
+    .reviews-list { display:grid; grid-template-columns: repeat( auto-fit, minmax(280px, 1fr) ); gap:14px; }
+    .review-card { border:1px solid #eee; border-radius:14px; padding:16px; background:#fff; box-shadow: var(--card-shadow, 0 6px 24px rgba(0,0,0,.06)); display:flex; gap:12px; }
+    .rev-avatar { width:40px; height:40px; border-radius:50%; background:#f1f3f5; color:#444; display:flex; align-items:center; justify-content:center; font-weight:700; flex: 0 0 40px; }
+    .rev-name { font-weight:600; }
+    .rev-date { font-size:12px; opacity:.6; }
+    .rev-stars { color:#f1c40f; letter-spacing:1px; }
+    .filter-btn { padding:6px 10px; border-radius:999px; border:1px solid #ddd; background:#fff; cursor:pointer; }
+    .filter-btn.active { background: var(--primary, #c0392b); color:#fff; border-color: transparent; }
+  </style>
+
+  <script>
+    (async function(){
+      const listEl = document.getElementById('reviewsList');
+      const summaryEl = document.getElementById('reviewsSummary');
+      const res = await fetch('/data/reviews.json');
+      let REVIEWS = await res.json();
+
+      function initials(name){ return (name||'').split(/\s+/).map(p=>p[0]).slice(0,2).join('').toUpperCase(); }
+      function starStr(n){ return '★★★★★☆☆☆☆☆'.slice(5 - Math.round(n), 10 - Math.round(n)); }
+      function fmtDate(d){ return new Date(d).toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' }); }
+
+      function renderSummary(items){
+        const count = items.length;
+        const avg = count ? (items.reduce((s,r)=>s+r.rating,0)/count) : 0;
+        const score = summaryEl.querySelector('.score');
+        const stars = summaryEl.querySelector('.stars');
+        const cnt = summaryEl.querySelector('.count');
+        score.textContent = avg ? avg.toFixed(1) : '–';
+        stars.textContent = starStr(avg);
+        cnt.textContent = count ? `${count} review${count>1?'s':''}` : 'No reviews yet';
+      }
+
+      function cardTemplate(r){
+        return `
+          <article class="review-card">
+            <div class="rev-avatar">${initials(r.name)}</div>
+            <div class="rev-body">
+              <div class="rev-name">${r.name}</div>
+              <div class="rev-stars" aria-label="Rating: ${r.rating} out of 5">${'★★★★★'.slice(0, r.rating)}</div>
+              <div class="rev-date">${fmtDate(r.date)}</div>
+              <p style="margin-top:8px; line-height:1.5;">${r.comment}</p>
+            </div>
+          </article>`;
+      }
+
+      function renderList(items){
+        const tpl = items.map(cardTemplate).join('');
+        listEl.innerHTML = tpl;
+      }
+
+      function applyFilter()
+      {
+        const active = document.querySelector('.filter-btn.active');
+        const val = active ? active.dataset.rating : 'all';
+        const filtered = (val==='all') ? REVIEWS : REVIEWS.filter(r=>String(r.rating)===val);
+        renderSummary(filtered);
+        renderList(filtered);
+      }
+
+      document.querySelectorAll('.filter-btn').forEach(b=>{
+        b.addEventListener('click', ()=>{
+          document.querySelectorAll('.filter-btn').forEach(x=>x.classList.remove('active'));
+          b.classList.add('active');
+          applyFilter();
+        });
+      });
+
+      // Initial render (newest first)
+      REVIEWS = REVIEWS.sort((a,b)=> new Date(b.date) - new Date(a.date));
+      applyFilter();
+    })();
+  </script>
+</section>

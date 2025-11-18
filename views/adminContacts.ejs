@@ -1,0 +1,286 @@
+<section class="container">
+  <h2 style="margin-bottom:12px;">Contact Messages</h2>
+
+  <div class="tools-bar" style="margin-bottom:16px; display:flex; flex-wrap:wrap; align-items:center; gap:10px;">
+    <div class="status-filters" style="display:flex; gap:6px; align-items:center;">
+      <strong>Status:</strong>
+      <button class="filter-btn active" data-status="all">All</button>
+      <button class="filter-btn" data-status="New">New</button>
+      <button class="filter-btn" data-status="Responded">Responded</button>
+    </div>
+    <input id="searchMsgs" type="text" placeholder="Search name, email, phone, message" style="padding:8px 10px; border-radius:8px; border:1px solid #ddd; min-width:260px;">
+    <label>From: <input id="dateFrom" type="date" style="padding:6px 8px; border-radius:8px; border:1px solid #ddd;"></label>
+    <label>To: <input id="dateTo" type="date" style="padding:6px 8px; border-radius:8px; border:1px solid #ddd;"></label>
+    <button id="exportCsvBtn" class="btn-primary" style="padding:8px 12px; border-radius:8px;">Export CSV</button>
+    <div style="margin-left:auto; display:flex; gap:6px; align-items:center;">
+      <span id="selCount" style="font-size:12px; opacity:.7;">0 selected</span>
+      <button id="bulkRespond" class="btn-primary" disabled style="padding:8px 12px; border-radius:8px;">Mark Responded</button>
+      <button id="bulkNew" class="btn-secondary" disabled style="padding:8px 12px; border-radius:8px;">Mark New</button>
+      <button id="bulkDelete" class="btn-danger" disabled style="padding:8px 12px; border-radius:8px;">Delete</button>
+    </div>
+  </div>
+
+  <table class="reservation-table" id="msgsTable">
+    <thead>
+      <tr>
+        <th><input type="checkbox" id="selectAll"></th>
+        <th>From</th>
+        <th>Contact</th>
+        <th>Message</th>
+        <th>Status</th>
+        <th>Received</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="messagesTbody">
+      <% messages.forEach(m => { %>
+        <tr class="msg-row" data-id="<%= m._id %>" data-created="<%= m.createdAt.toISOString() %>" data-status="<%= m.responded ? 'Responded' : 'New' %>" data-search="<%= (m.name + ' ' + m.email + ' ' + (m.phone||'') + ' ' + m.message).replace(/["'\n]/g,' ') %>">
+          <td><input class="row-check" type="checkbox" value="<%= m._id %>"></td>
+          <td>
+            <strong><%= m.name %></strong>
+          </td>
+          <td>
+            <div><a href="mailto:<%= m.email %>"><%= m.email %></a></div>
+            <% if (m.phone) { %>
+              <div><a href="tel:<%= m.phone %>"><%= m.phone %></a></div>
+            <% } %>
+          </td>
+          <td>
+            <details>
+              <summary><%= m.message.length > 80 ? (m.message.slice(0,80) + '…') : m.message %></summary>
+              <div style="margin-top:8px; white-space:pre-wrap; line-height:1.5;"><%= m.message %></div>
+            </details>
+          </td>
+          <td>
+            <% if (m.responded) { %>
+              <span class="status-badge completed">Responded</span>
+            <% } else { %>
+              <span class="status-badge pending">New</span>
+            <% } %>
+          </td>
+          <td><small><%= m.createdAt.toLocaleString() %></small></td>
+          <td style="white-space:nowrap;">
+            <% if (!m.responded) { %>
+              <a href="/admin/contacts/respond/<%= m._id %>" class="btn-primary" style="padding:6px 10px; border-radius:8px; text-decoration:none;">Mark Responded</a>
+            <% } else { %>
+              <a href="/admin/contacts/unrespond/<%= m._id %>" class="btn-secondary" style="padding:6px 10px; border-radius:8px; text-decoration:none;">Mark New</a>
+            <% } %>
+            <a href="/admin/contacts/delete/<%= m._id %>" class="btn-danger" data-delete style="padding:6px 10px; border-radius:8px; text-decoration:none; margin-left:6px;">Delete</a>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+  <script>
+    (function(){
+      const tbody = document.getElementById('messagesTbody');
+      const search = document.getElementById('searchMsgs');
+      const from = document.getElementById('dateFrom');
+      const to = document.getElementById('dateTo');
+      const exportBtn = document.getElementById('exportCsvBtn');
+      const statusBtns = document.querySelectorAll('.status-filters .filter-btn');
+      const selectAll = document.getElementById('selectAll');
+      const bulkRespond = document.getElementById('bulkRespond');
+      const bulkNew = document.getElementById('bulkNew');
+      const bulkDelete = document.getElementById('bulkDelete');
+      const selCount = document.getElementById('selCount');
+      const selected = new Set();
+
+      function normalizeDateInput(el){ if (!el || !el.value) return null; const d = new Date(el.value + 'T00:00:00'); return isNaN(d) ? null : d; }
+      function endOfDay(d){ const e = new Date(d); e.setHours(23,59,59,999); return e; }
+
+      function applyFilters(){
+        const q = (search && search.value ? search.value : '').toLowerCase().trim();
+        const activeStatusBtn = document.querySelector('.status-filters .filter-btn.active');
+        const statusVal = activeStatusBtn ? activeStatusBtn.dataset.status : 'all';
+        const f = normalizeDateInput(from);
+        const t = normalizeDateInput(to);
+        const tEnd = t ? endOfDay(t) : null;
+        const rows = tbody.querySelectorAll('.msg-row');
+        rows.forEach(r => {
+          const matchText = q ? (r.dataset.search || '').toLowerCase().includes(q) : true;
+          const matchStatus = (statusVal === 'all' || r.dataset.status === statusVal);
+          let matchDate = true; if (f || tEnd) { const created = new Date(r.dataset.created); if (f && created < f) matchDate = false; if (tEnd && created > tEnd) matchDate = false; }
+          r.style.display = (matchText && matchDate && matchStatus) ? '' : 'none';
+        });
+      }
+
+      statusBtns.forEach(btn => btn.addEventListener('click', function(){
+        statusBtns.forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        applyFilters();
+      }));
+
+      search?.addEventListener('input', applyFilters);
+      from?.addEventListener('change', applyFilters);
+      to?.addEventListener('change', applyFilters);
+
+      function updateBulkButtons(){
+        const count = selected.size;
+        selCount.textContent = count + ' selected';
+        [bulkRespond, bulkNew, bulkDelete].forEach(b => b.disabled = count === 0);
+      }
+
+      function syncSelectAll(){
+        const checks = Array.from(tbody.querySelectorAll('.row-check')).filter(c => c.closest('tr').style.display !== 'none');
+        const checked = checks.filter(c => c.checked).length;
+        selectAll.checked = (checks.length && checked === checks.length);
+        selectAll.indeterminate = (checked > 0 && checked < checks.length);
+      }
+
+      function bindRowChecks(scope){
+        (scope || document).querySelectorAll('.row-check').forEach(chk => {
+          chk.addEventListener('change', function(){
+            if (chk.checked) selected.add(chk.value); else selected.delete(chk.value);
+            updateBulkButtons();
+            syncSelectAll();
+          });
+        });
+      }
+      bindRowChecks();
+
+      selectAll?.addEventListener('change', function(){
+        const visible = Array.from(tbody.querySelectorAll('.row-check')).filter(c => c.closest('tr').style.display !== 'none');
+        visible.forEach(c => { c.checked = selectAll.checked; if (c.checked) selected.add(c.value); else selected.delete(c.value); });
+        updateBulkButtons();
+        syncSelectAll();
+      });
+
+      async function bulkAction(action){
+        if (!selected.size) return;
+        if (action === 'delete' && !confirm('Delete selected messages?')) return;
+        try {
+          const ids = Array.from(selected);
+          const res = await fetch('/admin/contacts/bulk', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ ids, action }) });
+          if (!res.ok) return;
+          if (action === 'delete') {
+            ids.forEach(id => { const row = tbody.querySelector(`.msg-row[data-id="${id}"]`); if (row) row.remove(); });
+          } else if (action === 'respond' || action === 'unrespond') {
+            const responded = (action === 'respond');
+            ids.forEach(id => {
+              const row = tbody.querySelector(`.msg-row[data-id="${id}"]`);
+              if (!row) return;
+              row.dataset.status = responded ? 'Responded' : 'New';
+              const statusCell = row.children[4];
+              if (statusCell) statusCell.innerHTML = responded ? '<span class="status-badge completed">Responded</span>' : '<span class="status-badge pending">New</span>';
+              const actionsCell = row.children[6];
+              if (actionsCell) {
+                actionsCell.innerHTML = responded
+                  ? `<a href="/admin/contacts/unrespond/${id}" class="btn-secondary" style="padding:6px 10px; border-radius:8px; text-decoration:none;">Mark New</a> <a href="/admin/contacts/delete/${id}" class="btn-danger" data-delete style="padding:6px 10px; border-radius:8px; text-decoration:none; margin-left:6px;">Delete</a>`
+                  : `<a href="/admin/contacts/respond/${id}" class="btn-primary" style="padding:6px 10px; border-radius:8px; text-decoration:none;">Mark Responded</a> <a href="/admin/contacts/delete/${id}" class="btn-danger" data-delete style="padding:6px 10px; border-radius:8px; text-decoration:none; margin-left:6px;">Delete</a>`;
+              }
+            });
+          }
+          selected.clear();
+          tbody.querySelectorAll('.row-check').forEach(c => c.checked = false);
+          updateBulkButtons();
+          syncSelectAll();
+          applyFilters();
+        } catch(e){}
+      }
+
+      bulkRespond?.addEventListener('click', ()=>bulkAction('respond'));
+      bulkNew?.addEventListener('click', ()=>bulkAction('unrespond'));
+      bulkDelete?.addEventListener('click', ()=>bulkAction('delete'));
+
+      function download(filename, text) { const a = document.createElement('a'); a.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(text)); a.setAttribute('download', filename); a.style.display = 'none'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
+      exportBtn?.addEventListener('click', () => {
+        const visibleRows = Array.from(tbody.querySelectorAll('.msg-row')).filter(r => r.style.display !== 'none');
+        const lines = []; lines.push(['Name','Email','Phone','Message','Status','Received'].join(','));
+        visibleRows.forEach(r => {
+          const tds = r.querySelectorAll('td');
+          const name = (tds[1]?.innerText||'').replace(/\n/g,' ').trim();
+          const contact = (tds[2]?.innerText||'').replace(/\n/g,' ').trim();
+          const msg = (tds[3]?.innerText||'').replace(/\n/g,' ').trim();
+          const status = (tds[4]?.innerText||'').replace(/\n/g,' ').trim();
+          const received = (tds[5]?.innerText||'').replace(/\n/g,' ').trim();
+          const email = (r.querySelector('a[href^="mailto:"]')?.textContent||'').trim();
+          const phone = (r.querySelector('a[href^="tel:"]')?.textContent||'').trim();
+          const row = [name, email, phone, msg, status, received].map(v => '"' + String(v).replace(/"/g,'""') + '"').join(',');
+          lines.push(row);
+        });
+        const csv = lines.join('\n');
+        const ts = new Date().toISOString().replace(/[:.]/g,'-');
+        download(`contacts-${ts}.csv`, csv);
+      });
+
+      document.querySelectorAll('[data-delete]').forEach(a => {
+        a.addEventListener('click', (e) => {
+          if (!confirm('Delete this message?')) e.preventDefault();
+        });
+      });
+
+      // SSE live new contact insert
+      function flashRow(row){ row.classList.add('row-updated'); setTimeout(function(){ row.classList.remove('row-updated'); }, 1200); }
+      function toSafe(str){ return String(str||'').replace(/[&<>]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]); }); }
+      function beep(){
+        try {
+          var ctx = new (window.AudioContext || window.webkitAudioContext)();
+          var o = ctx.createOscillator(); var g = ctx.createGain();
+          o.type='triangle'; o.frequency.value=660; o.connect(g); g.connect(ctx.destination);
+          g.gain.setValueAtTime(0.001, ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.08, ctx.currentTime + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+          o.start(); o.stop(ctx.currentTime + 0.28);
+        } catch(e){}
+      }
+
+      if (window.EventSource) {
+        var es = new EventSource('/events/admin/orders'); // reuse admin SSE channel
+        es.addEventListener('new-contact', async function(ev){
+          try {
+            var data = JSON.parse(ev.data);
+            var res = await fetch('/api/contact/' + data.id, { credentials: 'same-origin' });
+            if (!res.ok) return;
+            var m = await res.json();
+            var tr = document.createElement('tr');
+            tr.className = 'msg-row';
+            tr.setAttribute('data-id', m._id);
+            tr.setAttribute('data-created', new Date(m.createdAt).toISOString());
+            tr.setAttribute('data-status', m.responded ? 'Responded' : 'New');
+            tr.setAttribute('data-search', (m.name + ' ' + m.email + ' ' + (m.phone||'') + ' ' + m.message).replace(/["'\n]/g,' '));
+            var msgPreview = m.message.length > 80 ? (m.message.slice(0,80) + '…') : m.message;
+            tr.innerHTML = `
+              <td><input class="row-check" type="checkbox" value="${m._id}"></td>
+              <td><strong>${toSafe(m.name)}</strong></td>
+              <td>
+                <div><a href="mailto:${toSafe(m.email)}">${toSafe(m.email)}</a></div>
+                ${m.phone ? `<div><a href="tel:${toSafe(m.phone)}">${toSafe(m.phone)}</a></div>` : ''}
+              </td>
+              <td>
+                <details>
+                  <summary>${toSafe(msgPreview)}</summary>
+                  <div style="margin-top:8px; white-space:pre-wrap; line-height:1.5;">${toSafe(m.message)}</div>
+                </details>
+              </td>
+              <td>${m.responded ? '<span class="status-badge completed">Responded</span>' : '<span class="status-badge pending">New</span>'}</td>
+              <td><small>${new Date(m.createdAt).toLocaleString()}</small></td>
+              <td style="white-space:nowrap;">
+                ${m.responded
+                  ? `<a href="/admin/contacts/unrespond/${m._id}" class="btn-secondary" style="padding:6px 10px; border-radius:8px; text-decoration:none;">Mark New</a>`
+                  : `<a href="/admin/contacts/respond/${m._id}" class="btn-primary" style="padding:6px 10px; border-radius:8px; text-decoration:none;">Mark Responded</a>`}
+                <a href="/admin/contacts/delete/${m._id}" class="btn-danger" data-delete style="padding:6px 10px; border-radius:8px; text-decoration:none; margin-left:6px;">Delete</a>
+              </td>`;
+            tbody.prepend(tr);
+            bindRowChecks(tr);
+            flashRow(tr);
+            beep();
+            applyFilters();
+          } catch(e){}
+        });
+      }
+
+      applyFilters();
+    })();
+  </script>
+
+  <style>
+    details summary { cursor:pointer; user-select:none; }
+    details summary::-webkit-details-marker { display:none; }
+    details summary:after { content:' ▶'; opacity:.5; }
+    details[open] summary:after { content:' ▼'; }
+    @keyframes rowFlash { from { background:#fff7d6; } to { background:transparent; } }
+    .row-updated { animation: rowFlash 1.2s ease forwards; }
+  </style>
+</section>

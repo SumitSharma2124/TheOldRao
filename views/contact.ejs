@@ -1,0 +1,98 @@
+<section class="container">
+  <h2 style="margin-bottom:12px;">Contact Us</h2>
+  <p style="margin-bottom:20px; opacity:.8;">We’d love to hear from you. Fill the form and we’ll get back shortly.</p>
+
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div class="alert error" role="alert"> <%= error %> </div>
+  <% } %>
+  <% if (submitted) { %>
+    <div class="alert success" role="status">
+      <span class="ico">✓</span>
+      Thanks! Your message has been sent.
+    </div>
+  <% } %>
+
+  <div class="contact-wrap">
+    <aside class="contact-aside">
+      <div class="aside-card">
+        <h3>Reach us</h3>
+        <ul class="list">
+          <li><span class="ico">📍</span><div><strong>Address</strong><br><span>Near Central Market, Your City</span></div></li>
+          <li><span class="ico">⏰</span><div><strong>Hours</strong><br><span>Daily 11:00 – 23:00</span></div></li>
+          <li><span class="ico">☎️</span><div><strong>Phone</strong><br><span><a href="tel:+910000000000">+91 00000 00000</a></span></div></li>
+          <li><span class="ico">✉️</span><div><strong>Email</strong><br><span><a href="mailto:hello@oldrao.com">hello@oldrao.com</a></span></div></li>
+        </ul>
+      </div>
+      <div class="aside-card map">
+        <div class="map-placeholder">Map coming soon</div>
+      </div>
+    </aside>
+
+    <form action="/contact" method="POST" class="contact-card" id="contactForm" novalidate>
+      <div class="grid">
+        <label>
+          <span>Name*</span>
+          <input type="text" name="name" required placeholder="Your name" autocomplete="name" />
+        </label>
+        <label>
+          <span>Email*</span>
+          <input type="email" name="email" required placeholder="you@example.com" autocomplete="email" />
+        </label>
+        <label>
+          <span>Phone</span>
+          <input type="tel" name="phone" placeholder="Optional" autocomplete="tel" />
+        </label>
+        <label class="full">
+          <span>Message*</span>
+          <textarea name="message" id="message" required rows="6" maxlength="1000" placeholder="How can we help?"></textarea>
+          <div class="hint"><span id="msgCount">0</span>/1000</div>
+        </label>
+      </div>
+      <button type="submit" class="btn-primary submit-btn">Send Message</button>
+    </form>
+  </div>
+
+  <style>
+    .alert { margin-bottom:12px; padding:10px 12px; border-radius:10px; display:flex; align-items:center; gap:8px; }
+    .alert.error { border:1px solid #ffd1d1; background:#fff5f5; }
+    .alert.success { border:1px solid #b6e3b6; background:#f2fff2; }
+    .alert .ico { font-weight:700; }
+
+    .contact-wrap { display:grid; grid-template-columns: 340px 1fr; gap:16px; }
+    @media (max-width: 900px){ .contact-wrap { grid-template-columns: 1fr; } }
+
+    .contact-aside { display:flex; flex-direction:column; gap:16px; }
+    .aside-card { border:1px solid #eee; border-radius:14px; padding:16px; background:#fff; box-shadow: var(--card-shadow, 0 6px 24px rgba(0,0,0,.06)); }
+    .aside-card h3 { margin-top:0; }
+    .list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px; }
+    .list li { display:flex; gap:10px; align-items:flex-start; }
+    .list .ico { width:24px; text-align:center; }
+    .map .map-placeholder { height:180px; border-radius:12px; background: linear-gradient(135deg, #f1f3f5, #e9ecef); display:flex; align-items:center; justify-content:center; color:#666; font-size:14px; }
+
+    .contact-card { border:1px solid #eee; border-radius:14px; padding:16px; background:#fff; box-shadow: var(--card-shadow, 0 6px 24px rgba(0,0,0,.06)); }
+    .contact-card .grid { display:grid; grid-template-columns: repeat( auto-fit, minmax(240px, 1fr) ); gap:12px; grid-auto-flow: row dense; }
+    @media (max-width: 640px){ .contact-card .grid { grid-template-columns: 1fr; } }
+    .contact-card label { display:flex; flex-direction:column; }
+    .contact-card label span { display:block; font-size:12px; opacity:.7; margin-bottom:6px; }
+    .contact-card input, .contact-card textarea { width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:10px; outline:none; box-sizing:border-box; }
+    .contact-card input { min-height:44px; }
+    .contact-card input:focus, .contact-card textarea:focus { border-color: var(--primary, #c0392b); box-shadow:0 0 0 3px rgba(192,57,43,.08); }
+    .contact-card label.full { grid-column: 1 / -1; position:relative; }
+    .contact-card .hint { position:absolute; right:10px; bottom:10px; font-size:12px; opacity:.6; }
+    .submit-btn { padding:10px 14px; border-radius:10px; margin-top:12px; }
+    .submit-btn[disabled] { opacity:.7; cursor:not-allowed; }
+  </style>
+
+  <script>
+    (function(){
+      const msg = document.getElementById('message');
+      const cnt = document.getElementById('msgCount');
+      const form = document.getElementById('contactForm');
+      const btn = form?.querySelector('.submit-btn');
+      function updateCount(){ if (!msg || !cnt) return; cnt.textContent = String(msg.value.length); }
+      msg?.addEventListener('input', updateCount);
+      updateCount();
+      form?.addEventListener('submit', ()=>{ if (btn){ btn.disabled = true; btn.textContent = 'Sending…'; } });
+    })();
+  </script>
+</section>

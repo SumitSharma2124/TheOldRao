@@ -7,10 +7,17 @@
   <title>Old Rao</title>
 
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Poppins:wght@300;400;600&family=Montserrat:wght@500;600&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 
   <!-- CSS -->
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/header.css">
+  <link rel="stylesheet" href="/css/navbar.css">
+  <link rel="stylesheet" href="/css/menu.css">
+  <%- defineContent('styles') %>
 </head>
 
 <body>
@@ -18,8 +25,12 @@
   <!-- HEADER -->
   <%- include("partials/header") %>
 
-  <!-- NAVBAR -->
-  <%- include("partials/navbar") %>
+  <!-- NAVBAR (hidden for admins) -->
+  <% if (!(typeof session !== 'undefined' && session && session.user && session.user.role === 'admin')) { %>
+    <%- include("partials/navbar") %>
+  <% } %>
+  <!-- CART SIDEBAR & OVERLAY PARTIAL -->
+  <%- include("partials/cartSidebar") %>
   
 
   <main>

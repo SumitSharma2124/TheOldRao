@@ -1,0 +1,56 @@
+<%- contentFor('styles') %>
+<link rel="stylesheet" href="/css/admin.css">
+
+<section class="container">
+  <div class="admin-header">
+    <h2>Admin Dashboard</h2>
+    <p class="admin-sub">Quick access to orders, menu, reservations, and messages.</p>
+  </div>
+
+  <div class="admin-grid">
+    <a href="/admin/orders" class="admin-card">
+      <div class="ico">🧾</div>
+      <div>
+        <h3>Orders</h3>
+        <div class="desc">Manage and track all orders.</div>
+      </div>
+      <div class="stat" title="Pending / Preparing / Out"><%= (stats?.pendingOrders||0) %>/<%= (stats?.preparingOrders||0) %>/<%= (stats?.outForDelivery||0) %></div>
+    </a>
+
+    <a href="/admin/menu" class="admin-card">
+      <div class="ico">🍽️</div>
+      <div>
+        <h3>Menu</h3>
+        <div class="desc">Create, edit, and remove items.</div>
+      </div>
+    </a>
+
+    <a href="/admin/reservations" class="admin-card">
+      <div class="ico">📅</div>
+      <div>
+        <h3>Reservations</h3>
+        <div class="desc">Confirm and manage bookings.</div>
+      </div>
+      <div class="stat"><%= (stats?.reservations||0) %></div>
+    </a>
+
+    <a href="/admin/contacts" class="admin-card">
+      <div class="ico">✉️</div>
+      <div>
+        <h3>Messages</h3>
+        <div class="desc">New and responded inquiries.</div>
+      </div>
+      <div class="stat" title="New messages"><%= (stats?.contactsNew||0) %></div>
+    </a>
+
+    <a href="/admin/users" class="admin-card">
+      <div class="ico">👤</div>
+      <div>
+        <h3>Users</h3>
+        <div class="desc">Admins and customers management.</div>
+      </div>
+    </a>
+  </div>
+
+  
+</section>

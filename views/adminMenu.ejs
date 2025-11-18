@@ -2,32 +2,104 @@
 <section class="container">
   <h2>Manage Menu</h2>
 
-  <form action="/admin/menu/add" method="POST" class="admin-form">
-    <input name="name" placeholder="Dish Name" required>
-    <input name="price" placeholder="Price" type="number" required>
-    <input name="img" placeholder="Image URL">
-    <select name="category">
-      <option value="snacks">Snacks</option>
-      <option value="main">Main Course</option>
-      <option value="breads">Breads</option>
-      <option value="dessert">Dessert</option>
-      <option value="drinks">Drinks</option>
-    </select>
-    <button type="submit">Add Dish</button>
-  </form>
+  <div class="add-card">
+    <form action="/admin/menu/add" method="POST" class="admin-form" enctype="multipart/form-data" id="addMenuForm">
+      <div class="grid">
+        <label>
+          <span>Dish Name*</span>
+          <input name="name" placeholder="Dish Name" required>
+        </label>
+        <label>
+          <span>Price (₹)*</span>
+          <input name="price" placeholder="Price" type="number" min="0" step="0.01" required>
+        </label>
+        <label>
+          <span>Category*</span>
+          <select name="category" required>
+            <option value="snacks">Snacks</option>
+            <option value="main">Main Course</option>
+            <option value="breads">Breads</option>
+            <option value="dessert">Dessert</option>
+            <option value="drinks">Drinks</option>
+          </select>
+        </label>
+        <label>
+          <span>Image URL (optional)</span>
+          <input name="img" placeholder="https://...">
+        </label>
+        <label class="full">
+          <span>Or Upload Image</span>
+          <input type="file" name="image" id="imageInput" accept="image/*">
+        </label>
+      </div>
+      <div class="preview-wrap">
+        <img id="imgPreview" src="/images/placeholder.jpg" alt="Preview">
+      </div>
+      <button type="submit" class="btn-primary">Add Dish</button>
+    </form>
+  </div>
 
-  <hr>
+  <h3 style="margin-top:18px;">Existing Dishes</h3>
 
-  <h3>Existing Dishes</h3>
+  <div class="cards">
+    <% menu.forEach(item => { %>
+      <div class="menu-card">
+        <img src="<%= item.img %>" alt="<%= item.name %>" onerror="this.onerror=null;this.src='/images/placeholder.jpg';">
+        <div class="info">
+          <div class="title-row">
+            <strong class="title"><%= item.name %></strong>
+            <span class="price">₹<%= item.price %></span>
+          </div>
+          <div class="meta chip"><%= item.category %></div>
+          <div class="actions">
+            <a class="btn-primary" href="/admin/menu/edit/<%= item._id %>">Edit</a>
+            <a class="btn-danger" href="/admin/menu/delete/<%= item._id %>">Delete</a>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+  </div>
 
- <ul>
-  <% menu.forEach(item => { %>
-      <li>
-        <strong><%= item.name %></strong> — ₹<%= item.price %> 
-        
-        <a class="edit-btn" href="/admin/menu/edit/<%= item._id %>">Edit</a>
-        <a class="delete-btn" href="/admin/menu/delete/<%= item._id %>">Delete</a>
-      </li>
-  <% }) %>
-</ul>
+  <style>
+    .add-card { background:#fff; border:1px solid #eee; border-radius:14px; box-shadow: var(--card-shadow, 0 6px 24px rgba(0,0,0,.06)); padding:16px; margin-bottom:16px; }
+    .admin-form .grid { display:grid; grid-template-columns: repeat( auto-fit, minmax(220px, 1fr) ); gap:12px; }
+    .admin-form label { display:flex; flex-direction:column; }
+    .admin-form label span { font-size:12px; opacity:.7; margin-bottom:6px; }
+    .admin-form input, .admin-form select { padding:10px 12px; border:1px solid #ddd; border-radius:10px; }
+    .admin-form .full { grid-column: 1 / -1; }
+    .preview-wrap { margin:12px 0; }
+    #imgPreview { width:160px; height:120px; object-fit:cover; border-radius:10px; border:1px solid #eee; }
+    .btn-primary { padding:8px 12px; border-radius:10px; text-decoration:none; display:inline-block; }
+    .btn-danger { padding:8px 12px; border-radius:10px; text-decoration:none; display:inline-block; background:#ffe9e9; border:1px solid #ffd3d3; }
+    .cards { display:grid; grid-template-columns: repeat( auto-fit, minmax(240px, 1fr) ); gap:14px; align-items: stretch; margin-bottom: 28px; }
+    .menu-card { display:flex; flex-direction:column; background:#fff; border:1px solid #eee; border-radius:14px; padding:12px; box-shadow: var(--card-shadow, 0 6px 24px rgba(0,0,0,.06)); height:100%; transition: transform .12s ease, box-shadow .12s ease; }
+    .menu-card:hover { box-shadow: 0 10px 26px rgba(0,0,0,.08); }
+    .menu-card img { width:100%; height:160px; object-fit:cover; border-radius:10px; border:1px solid #eee; }
+    .menu-card .info { display:flex; flex-direction:column; gap:6px; flex:1; margin-top:10px; }
+    .menu-card .title-row { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+    .menu-card .title { font-weight:700; line-height:1.2; flex:1; }
+    .menu-card .price { background:#f5f5f5; border:1px solid #eee; padding:4px 8px; border-radius:999px; font-weight:600; font-size:.9rem; white-space:nowrap; }
+    .menu-card .meta { font-size:.8rem; opacity:.7; }
+    .menu-card .chip { display:inline-block; background:#fafafa; border:1px solid #eee; padding:3px 8px; border-radius:999px; width:max-content; }
+    .menu-card .actions { margin-top:auto; display:flex; gap:8px; }
+    .btn-primary { background: var(--primary); color:#fff; border:1px solid transparent; }
+    .btn-danger { color:#b42318; }
+  </style>
+
+  <script>
+    (function(){
+      const urlInput = document.querySelector('input[name="img"]');
+      const fileInput = document.getElementById('imageInput');
+      const preview = document.getElementById('imgPreview');
+      function setPreview(src){ if (!src) return; preview.src = src; }
+      urlInput?.addEventListener('input', ()=> setPreview(urlInput.value));
+      fileInput?.addEventListener('change', ()=>{
+        const f = fileInput.files && fileInput.files[0];
+        if (!f) return;
+        const reader = new FileReader();
+        reader.onload = e => setPreview(e.target.result);
+        reader.readAsDataURL(f);
+      });
+    })();
+  </script>
 </section>

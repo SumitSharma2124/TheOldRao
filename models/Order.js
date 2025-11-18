@@ -7,18 +7,22 @@ const OrderSchema = new mongoose.Schema({
       name: String,
       price: Number,
       qty: Number,
-      phone: String,
-      address: String,
-      payment: String,
-
+      img: String
     }
   ],
   total: Number,
-  userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true
-     },
+  // Customer association (nullable to allow guest orders if desired)
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: false,
+    default: null
+  },
+  // Customer details captured at checkout
+  name: String,
+  phone: String,
+  address: String,
+  payment: String,
   status: {
     type: String,
     enum: ["Pending", "Preparing", "Out for Delivery", "Completed", "Cancelled"],

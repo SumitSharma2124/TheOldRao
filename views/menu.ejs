@@ -1,29 +1,40 @@
-
 <section class="menu-page container">
+    <h2 class="section-title">Our Menu</h2>
+
     <!-- FILTER BAR -->
     <div class="menu-filters">
-        <button class="filter-btn active" data-category="all">All</button>
-        <button class="filter-btn" data-category="snacks">Snacks</button>
-        <button class="filter-btn" data-category="main">Main Course</button>
-        <button class="filter-btn" data-category="breads">Breads</button>
-        <button class="filter-btn" data-category="dessert">Desserts</button>
-        <button class="filter-btn" data-category="drinks">Drinks</button>
+        <div class="filter-chips">
+            <button class="filter-btn active" data-category="all">All</button>
+            <button class="filter-btn" data-category="snacks">Snacks</button>
+            <button class="filter-btn" data-category="main">Main Course</button>
+            <button class="filter-btn" data-category="breads">Breads</button>
+            <button class="filter-btn" data-category="dessert">Desserts</button>
+            <button class="filter-btn" data-category="drinks">Drinks</button>
+        </div>
+        <div class="menu-controls">
+            <input id="menuSearch" type="text" placeholder="Search dishes..." aria-label="Search menu"/>
+            <select id="menuSort" aria-label="Sort menu">
+                <option value="featured">Featured</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="name-asc">Name: A → Z</option>
+            </select>
+            <span id="menuCount" class="menu-count"></span>
+        </div>
     </div>
 
     <!-- MENU ITEMS WILL RENDER HERE -->
     <div id="menuContainer" class="menu-grid"></div>
+
+    <style>
+        .menu-count{ opacity:.7; font-size:.9rem; }
+        .menu-filters{ position: sticky; top: calc(var(--header-h) + var(--nav-h) + 8px); z-index: 9; }
+        .menu-filters{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+        .filter-chips{ display:flex; gap:10px; flex-wrap:wrap; }
+        .menu-controls{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-left:auto; }
+        #menuSearch{ padding:8px 10px; border:1px solid #ddd; border-radius:10px; }
+        #menuSort{ padding:8px 10px; border:1px solid #ddd; border-radius:10px; }
+    </style>
 </section>
 
-<div id="cartSidebar" class="cart-sidebar">
-    <div class="cart-header">
-        <h3>Your Cart</h3>
-        <button id="closeCart" class="close-btn">X</button>
-    </div>
-
-    <div id="cartItems" class="cart-items"></div>
-
-    <div class="cart-footer">
-        <p class="cart-total">Total: ₹<span id="cartTotal">0</span></p>
-        <a href="/checkout" id="goCheckoutBtn" class="checkout-btn">Checkout</a>
-    </div>
-</div>
+<!-- Cart sidebar is now included globally via layout.ejs partial -->

@@ -39,12 +39,10 @@
           Total: <strong>₹<%= order.total %></strong>
         </div>
 
-        <form action="/order" method="POST">
-          <input type="hidden" name="items" value='<%= JSON.stringify(order.items) %>'>
-          <input type="hidden" name="total" value="<%= order.total %>">
-          <button class="btn-secondary reorder-btn">Reorder</button>
-          <a href="/order/<%= order._id %>" class="btn-secondary">View Details</a>
-        </form>
+        <div>
+          <a href="/order/<%= order._id %>" class="btn-primary" style="padding:8px 14px; border-radius:10px; text-decoration:none;">Details</a>
+          <button type="button" class="btn-secondary reorder-btn" data-orderid="<%= order._id %>" style="padding:8px 14px; border:none; border-radius:10px; cursor:pointer;">Reorder</button>
+        </div>
       </div>
 
     </div>

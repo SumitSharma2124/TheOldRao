@@ -7,45 +7,87 @@
 .menu-filters {
   display: flex;
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   flex-wrap: wrap;
+  align-items: center;
+  background: #ffffff;
+  padding: 10px;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(16,24,40,0.06);
 }
 
 .filter-btn {
-  padding: 10px 16px;
-  border-radius: 10px;
-  border: none;
-  background: var(--secondary);
-  color: var(--text);
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.06);
+  background: transparent;
+  color: #2b2b2b;
   cursor: pointer;
   font-weight: 600;
+  transition: all 0.18s ease;
 }
 
 .filter-btn.active {
-  background: var(--primary);
+  background: #C44536;
   color: white;
+  border-color: transparent;
+  box-shadow: 0 8px 18px rgba(196,69,54,0.12);
+}
+
+.filter-btn:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(16,24,40,0.06);
 }
 
 .menu-grid {
   display: grid;
-  gap: 20px;
+  gap: 18px;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }
 
 .menu-item-card {
   background: white;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 12px;
   box-shadow: var(--card-shadow);
-  text-align: center;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ensure cart items can host an overlay remove button */
+.cart-item{
+  position: relative;
+  padding-right: 48px; /* room for the remove button overlay */
+}
+
+.cart-remove-btn{
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: #E04B3C;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(224,75,60,0.12);
+}
+
+.cart-remove-btn:hover{
+  transform: scale(1.03);
 }
 
 .menu-item-card img {
   width: 100%;
   height: 160px;
-  border-radius: 10px;
+  border-radius: 12px;
   object-fit: cover;
-  margin-bottom: 10px;
 }
 
 .menu-title {
@@ -59,15 +101,17 @@
   margin: 6px 0;
 }
 
+.menu-footer { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:auto; }
 .add-btn {
-  padding: 10px 16px;
-  background: var(--accent);
-  color: white;
-  border-radius: 8px;
+  padding: 10px 14px;
+  background: #E3C770; /* match btn-secondary */
+  color: #2B2B2B;
+  border-radius: 10px;
+  text-decoration: none;
   border: none;
   cursor: pointer;
-  margin-top: 10px;
 }
+.menu-item-card:hover { box-shadow: 0 10px 26px rgba(0,0,0,.08); }
 
 /* ------------------ CART SIDEBAR ------------------ */
 
@@ -79,14 +123,31 @@
   height: 100vh;
   background: white;
   box-shadow: -4px 0 14px rgba(0,0,0,0.2);
-  padding: 20px;
+  padding: 20px 20px 32px; /* extra bottom padding to lift footer/CTA */
   transition: right 0.3s ease;
   display: flex;
   flex-direction: column;
+  z-index: 1300; /* above overlay and header */
+  box-sizing: border-box;
 }
 
 .cart-sidebar.open {
   right: 0;
+}
+
+/* overlay behind cart */
+.cart-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease;
+  z-index: 1200; /* above header/navbar so full-page dimming works */
+}
+.cart-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .close-btn {
@@ -106,6 +167,7 @@
   flex: 1;
   overflow-y: auto;
   margin-top: 10px;
+  padding-bottom: 12px; /* avoid content touching footer */
 }
 
 .cart-item {
@@ -115,16 +177,41 @@
 }
 
 .cart-footer {
-  border-top: 1px solid #ccc;
-  padding-top: 10px;
+  margin-top: auto; /* pin footer to bottom within flex column */
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: var(--card-shadow);
 }
 
 .checkout-btn {
   width: 100%;
-  padding: 12px;
+  padding: 12px 14px;
   background: var(--primary);
   color: white;
   border-radius: 8px;
   border: none;
   cursor: pointer;
+  display: block;
+  margin-top: 10px;
+  text-decoration: none;
+  text-align: center;
+  font-weight: 600;
+  box-sizing: border-box;
+}
+
+/* iOS safe-area support so CTA isn't clipped */
+@supports (padding: max(0px)) {
+  .cart-sidebar { padding-bottom: max(32px, env(safe-area-inset-bottom)); }
+  .cart-footer { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+}
+
+/* Responsive sidebar width */
+@media (max-width: 600px) {
+  .cart-sidebar {
+    width: 92vw;
+    right: -92vw;
+  }
+  .cart-sidebar.open { right: 0; }
 }

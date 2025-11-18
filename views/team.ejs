@@ -1,0 +1,113 @@
+<section class="container">
+  <h2 class="team-title">Our Team</h2>
+  <p class="team-sub">Meet the people behind the plates and hospitality.</p>
+
+  <div class="team-controls">
+    <input type="text" id="teamSearch" placeholder="Search by name or role" aria-label="Search team">
+    <select id="teamRole" aria-label="Filter by role">
+      <option value="">All roles</option>
+    </select>
+    <button id="teamClear" class="btn-light" type="button">Clear</button>
+    <span class="team-count" id="teamCount"></span>
+  </div>
+
+  <div id="teamGrid" class="team-grid"></div>
+
+  <style>
+    .team-title { margin: 0 0 6px; font-family: 'Playfair Display', serif; font-size: 32px; }
+    .team-sub { margin: 0 0 16px; opacity: .8; }
+    .team-controls { display:flex; flex-wrap:wrap; gap:10px; align-items:center; background:#fff; border:1px solid #eee; padding:10px; border-radius:12px; box-shadow: var(--card-shadow); margin:10px 0 16px; }
+    .team-controls input, .team-controls select { padding:8px 10px; border:1px solid #ddd; border-radius:10px; }
+    .btn-light { padding:8px 12px; border-radius:10px; background:#f5f5f5; border:1px solid #e8e8e8; cursor:pointer; }
+    .team-count { margin-left:auto; font-size:.9rem; opacity:.8; }
+
+    .team-grid { display:grid; grid-template-columns: repeat( auto-fit, minmax(220px, 1fr) ); gap:44px 24px; padding: 10px; }
+    .team-card { position: relative; border:1px solid #eee; border-radius:16px; padding:14px; background:#fff; box-shadow: var(--card-shadow, 0 6px 24px rgba(0,0,0,.06)); display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px; transition: box-shadow .12s ease; height:100%; }
+    .team-card:hover, .team-card:focus-within { box-shadow: 0 10px 26px rgba(0,0,0,.08); z-index: 2; }
+    .avatar { width:88px; height:88px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; color:#fff; background: var(--primary, #c0392b); border: 3px solid #fff; box-shadow: 0 4px 14px rgba(0,0,0,.08); object-fit: cover; }
+    .team-card h3 { margin:6px 0 0; font-size:18px; }
+    .team-card .role { font-size:12px; opacity:.75; }
+    .team-card .bio { font-size:14px; line-height:1.5; opacity:.95; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-clamp: 3; }
+    .team-card .bio.open { display:block; -webkit-line-clamp: initial; line-clamp: initial; overflow: visible; }
+    .team-card .chips { display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin-top:6px; }
+    .chip { display:inline-block; font-size:12px; background: #f4f6f8; border:1px solid #eee; border-radius:999px; padding:6px 10px; }
+    .readmore { color: var(--primary); font-weight:600; cursor:pointer; font-size: 12px; }
+    .card-footer { margin-top:auto; }
+
+    @media (max-width: 640px) {
+      .avatar { width:76px; height:76px; }
+      .team-card { padding:12px; }
+    }
+
+    /* ensure space above footer */
+    section.container { margin-bottom: 22px; }
+  </style>
+
+  <script>
+    (async function(){
+      try {
+        const grid = document.getElementById('teamGrid');
+        const res = await fetch('/data/team.json');
+        const team = await res.json();
+
+        const search = document.getElementById('teamSearch');
+        const roleSel = document.getElementById('teamRole');
+        const clearBtn = document.getElementById('teamClear');
+        const countEl = document.getElementById('teamCount');
+
+        function initials(name){
+          return (name||'').split(/\s+/).map(p=>p[0]).slice(0,2).join('').toUpperCase();
+        }
+        function colorFor(i){
+          const colors = ['#1b4332','#c44536','#8e44ad','#1d3557','#d35400','#2b9348'];
+          return colors[i % colors.length];
+        }
+
+        // Build role filter options
+        const roles = Array.from(new Set(team.map(t => (t.role||'').trim()).filter(Boolean))).sort();
+        roles.forEach(r => { const o = document.createElement('option'); o.value = r; o.textContent = r; roleSel.appendChild(o); });
+
+        function matches(m){
+          const q = (search.value||'').toLowerCase().trim();
+          const role = (roleSel.value||'').toLowerCase().trim();
+          let ok = true;
+          if (q) ok = ok && ((m.name||'').toLowerCase().includes(q) || (m.role||'').toLowerCase().includes(q) || (m.specialty||'').toLowerCase().includes(q));
+          if (role) ok = ok && (m.role||'').toLowerCase() === role;
+          return ok;
+        }
+
+        function card(m, idx){
+          const avatar = m.photo ? `<img class="avatar" src="${m.photo}" alt="${m.name}" onerror="this.onerror=null;this.src='/images/placeholder.jpg'">`
+                                 : `<div class="avatar" style="background:${colorFor(idx)}">${initials(m.name)}</div>`;
+          const spec = m.specialty ? `<span class="chip">${m.specialty}</span>` : '';
+          return `
+            <div class="team-card">
+              ${avatar}
+              <div class="info">
+                <h3>${m.name}</h3>
+                <div class="role">${m.role||''}</div>
+                <div class="bio">${m.bio||''}</div>
+                <div class="chips">${spec}</div>
+              </div>
+              <div class="card-footer">
+                <span class="readmore" onclick="const c=this.closest('.team-card').querySelector('.bio'); c.classList.toggle('open'); this.innerText = c.classList.contains('open') ? 'Show less' : 'Read more';">Read more</span>
+              </div>
+            </div>
+          `;
+        }
+
+        function render(){
+          const list = team.map((m,i)=>({m, i})).filter(({m})=>matches(m));
+          grid.innerHTML = list.map(({m,i})=>card(m,i)).join('');
+          countEl.textContent = `${list.length}/${team.length}`;
+        }
+
+        search.addEventListener('input', render);
+        roleSel.addEventListener('change', render);
+        clearBtn.addEventListener('click', ()=>{ search.value=''; roleSel.value=''; render(); });
+
+        render();
+      } catch(e) { console.log(e); }
+    })();
+  </script>
+</section>

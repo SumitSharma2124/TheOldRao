@@ -1,36 +1,277 @@
 
 <section class="container">
-  <h2>Orders Dashboard</h2>
+  <h2 style="margin-bottom:12px;">Orders Dashboard</h2>
 
-  <table class="reservation-table">
-    <tr>
-      <th>Items</th>
-      <th>Total</th>
-      <th>Status</th>
-      <th>Time</th>
-      <th>Actions</th>
-    </tr>
+  <!-- Summary + Filters -->
+  <div class="menu-filters" style="margin-bottom:10px; display:flex; flex-wrap:wrap; align-items:center; gap:8px;">
+    <strong style="margin-right:8px;">Status:</strong>
+    <button class="filter-btn active" data-status="all">All</button>
+    <button class="filter-btn" data-status="Pending">Pending</button>
+    <button class="filter-btn" data-status="Preparing">Preparing</button>
+    <button class="filter-btn" data-status="Out for Delivery">Out for Delivery</button>
+    <button class="filter-btn" data-status="Completed">Completed</button>
+    <button class="filter-btn" data-status="Cancelled">Cancelled</button>
+  </div>
 
-    <% orders.forEach(o => { %>
+  <!-- Search / Date / Export -->
+  <div class="tools-bar" style="margin-bottom:16px; display:flex; flex-wrap:wrap; align-items:center; gap:10px;">
+    <input id="searchOrders" type="text" placeholder="Search by order, name, item" style="padding:8px 10px; border-radius:8px; border:1px solid #ddd; min-width:260px;">
+    <label>From: <input id="dateFrom" type="date" style="padding:6px 8px; border-radius:8px; border:1px solid #ddd;"></label>
+    <label>To: <input id="dateTo" type="date" style="padding:6px 8px; border-radius:8px; border:1px solid #ddd;"></label>
+    <button id="exportCsvBtn" class="btn-primary" style="padding:8px 12px; border-radius:8px;">Export CSV</button>
+    <span id="liveBadge" title="Live updates" style="margin-left:auto; display:flex; align-items:center; gap:6px; font-size:12px; opacity:.8;">
+      <span style="width:8px; height:8px; background:#2ecc71; border-radius:50%; display:inline-block; box-shadow:0 0 0 0 rgba(46,204,113,.7); animation:pulse 1.6s infinite;"></span>
+      Live
+    </span>
+  </div>
+
+  <table class="reservation-table" id="ordersTable">
+    <thead>
       <tr>
-        <td>
-          <% o.items.forEach(i => { %>
-            <%= i.name %> (x<%= i.qty %>) <br>
-          <% }) %>
-        </td>
-
-        <td>₹<%= o.total %></td>
-        <td><%= o.status %></td>
-        <td><%= o.createdAt.toLocaleString() %></td>
-
-        <td>
-          
-          <a href="/admin/orders/details/<%= o._id %>">View Details</a>     
-        </td>
-
+        <th>Order</th>
+        <th>Items</th>
+        <th>Total</th>
+        <th>Status</th>
+        <th>Placed</th>
+        <th>Actions</th>
       </tr>
-    <% }) %>
+    </thead>
+    <tbody id="ordersTbody">
+      <% orders.forEach(o => { 
+           const statusClass = o.status.replace(/\s+/g,'-').toLowerCase();
+           const shortId = String(o._id).slice(-6).toUpperCase();
+           const searchBlob = `${shortId} ${(o.name || 'Guest')}`;
+      %>
+        <tr class="order-row" data-id="<%= o._id %>" data-status="<%= o.status %>" data-created="<%= o.createdAt.toISOString() %>" data-search="<%= searchBlob %>">
+          <td>
+            <strong>#<%= shortId %></strong><br>
+            <small><%= o.name || 'Guest' %></small>
+          </td>
+          <td>
+            <% o.items.forEach((i, idx) => { %>
+              <%= i.name %> (x<%= i.qty %>)<% if (idx < o.items.length - 1) { %>, <% } %>
+            <% }) %>
+          </td>
 
+          <td><strong>₹<%= o.total %></strong></td>
+
+          <td>
+            <span class="status-badge <%= statusClass %>"><%= o.status %></span>
+          </td>
+
+          <td><small><%= o.createdAt.toLocaleString() %></small></td>
+
+          <td style="white-space:nowrap;">
+            <a href="/admin/orders/details/<%= o._id %>" class="btn-primary" style="padding:6px 10px; border-radius:8px; text-decoration:none;">Details</a>
+            <select class="order-status-select" data-id="<%= o._id %>" style="margin-left:8px; padding:6px 8px; border-radius:8px;">
+              <option <%= o.status==='Pending'?'selected':'' %> value="Pending">Pending</option>
+              <option <%= o.status==='Preparing'?'selected':'' %> value="Preparing">Preparing</option>
+              <option <%= o.status==='Out for Delivery'?'selected':'' %> value="Out for Delivery">Out for Delivery</option>
+              <option <%= o.status==='Completed'?'selected':'' %> value="Completed">Completed</option>
+              <option <%= o.status==='Cancelled'?'selected':'' %> value="Cancelled">Cancelled</option>
+            </select>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
   </table>
+
+  <script>
+    // Inline filters, CSV export, and SSE live updates
+    (function(){
+      const buttons = document.querySelectorAll('.menu-filters .filter-btn');
+      const searchInput = document.getElementById('searchOrders');
+      const dateFrom = document.getElementById('dateFrom');
+      const dateTo = document.getElementById('dateTo');
+      const tbody = document.getElementById('ordersTbody');
+      const exportBtn = document.getElementById('exportCsvBtn');
+
+      function activeStatus(){
+        const a = document.querySelector('.menu-filters .filter-btn.active');
+        return a ? a.dataset.status : 'all';
+      }
+
+      function normalizeDateInput(el){
+        if (!el || !el.value) return null;
+        const d = new Date(el.value + 'T00:00:00');
+        if (isNaN(d)) return null;
+        return d;
+      }
+
+      function endOfDay(d){
+        const e = new Date(d);
+        e.setHours(23,59,59,999);
+        return e;
+      }
+
+      function applyFilters(){
+        const status = activeStatus();
+        const q = (searchInput?.value || '').trim().toLowerCase();
+        const from = normalizeDateInput(dateFrom);
+        const to = normalizeDateInput(dateTo);
+        const toEnd = to ? endOfDay(to) : null;
+
+        const rows = tbody.querySelectorAll('.order-row');
+        rows.forEach(r => {
+          const matchStatus = (status === 'all' || r.dataset.status === status);
+          let matchSearch = true;
+          if (q) {
+            const cellText = (r.dataset.search + ' ' + r.textContent).toLowerCase();
+            matchSearch = cellText.includes(q);
+          }
+          let matchDate = true;
+          if (from || toEnd) {
+            const created = new Date(r.dataset.created);
+            if (from && created < from) matchDate = false;
+            if (toEnd && created > toEnd) matchDate = false;
+          }
+          r.style.display = (matchStatus && matchSearch && matchDate) ? '' : 'none';
+        });
+      }
+
+      buttons.forEach(btn => btn.addEventListener('click', () => {
+        buttons.forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        applyFilters();
+      }));
+
+      searchInput?.addEventListener('input', applyFilters);
+      dateFrom?.addEventListener('change', applyFilters);
+      dateTo?.addEventListener('change', applyFilters);
+
+      // Quick status update via select -> navigate to existing route
+      function bindStatusSelects(scope){
+        (scope || document).querySelectorAll('.order-status-select').forEach(sel => {
+          sel.addEventListener('change', () => {
+            const id = sel.dataset.id;
+            const url = `/admin/orders/update/${id}?status=` + encodeURIComponent(sel.value);
+            window.location.href = url;
+          });
+        });
+      }
+      bindStatusSelects();
+
+      // CSV export of visible rows
+      function download(filename, text) {
+        const a = document.createElement('a');
+        a.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(text));
+        a.setAttribute('download', filename);
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+      exportBtn?.addEventListener('click', () => {
+        const visibleRows = Array.from(tbody.querySelectorAll('.order-row')).filter(r => r.style.display !== 'none');
+        const lines = [];
+        lines.push(['Order','Items','Total','Status','Placed'].join(','));
+        visibleRows.forEach(r => {
+          const tds = r.querySelectorAll('td');
+          const order = tds[0]?.innerText.replace(/\n/g,' ').trim() || '';
+          const items = tds[1]?.innerText.replace(/\n/g,' ').trim() || '';
+          const total = tds[2]?.innerText.trim() || '';
+          const status = tds[3]?.innerText.trim() || '';
+          const placed = tds[4]?.innerText.trim() || '';
+          const row = [order, items, total, status, placed].map(v => '"' + v.replace(/"/g,'""') + '"').join(',');
+          lines.push(row);
+        });
+        const csv = lines.join('\n');
+        const ts = new Date().toISOString().replace(/[:.]/g,'-');
+        download(`orders-${ts}.csv`, csv);
+      });
+
+      // Live updates via SSE for admin dashboard
+      function toClass(s){ return String(s || '').toLowerCase().replace(/\s+/g,'-'); }
+      function flashRow(row){ row.classList.add('row-updated'); setTimeout(()=> row.classList.remove('row-updated'), 1200); }
+      function beep(){
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = 'sine'; o.frequency.value = 880; o.connect(g); g.connect(ctx.destination);
+          g.gain.setValueAtTime(0.0001, ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.08, ctx.currentTime + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.25);
+          o.start(); o.stop(ctx.currentTime + 0.3);
+        } catch {}
+      }
+      function showToast(msg){
+        if (!window.showToast) return; // use global toast if available from main.js
+        window.showToast(msg);
+      }
+
+      if (window.EventSource) {
+        const es = new EventSource('/events/admin/orders');
+        es.addEventListener('status-update', (ev) => {
+          try {
+            const data = JSON.parse(ev.data);
+            const row = document.querySelector(`#ordersTable .order-row[data-id="${data.id}"]`);
+            if (!row) return;
+            if (row.dataset.status !== data.status) {
+              row.dataset.status = data.status;
+              const badge = row.querySelector('.status-badge');
+              if (badge) { badge.textContent = data.status; badge.className = `status-badge ${toClass(data.status)}`; }
+              const sel = row.querySelector('.order-status-select');
+              if (sel) sel.value = data.status;
+              flashRow(row);
+              applyFilters();
+            }
+          } catch {}
+        });
+        es.addEventListener('new-order', async (ev) => {
+          try {
+            const data = JSON.parse(ev.data);
+            const res = await fetch(`/api/order/${data.id}`);
+            if (!res.ok) return;
+            const o = await res.json();
+            const shortId = String(o._id).slice(-6).toUpperCase();
+            const statusClass = toClass(o.status);
+            const tr = document.createElement('tr');
+            tr.className = 'order-row';
+            tr.dataset.id = o._id;
+            tr.dataset.status = o.status;
+            tr.dataset.created = new Date(o.createdAt).toISOString();
+            tr.dataset.search = `${shortId} ${(o.name || 'Guest')}`;
+            const itemsHtml = (o.items || []).map((i, idx) => `${i.name} (x${i.qty})`).join(', ');
+            tr.innerHTML = `
+              <td>
+                <strong>#${shortId}</strong><br>
+                <small>${o.name || 'Guest'}</small>
+              </td>
+              <td>${itemsHtml}</td>
+              <td><strong>₹${o.total}</strong></td>
+              <td><span class="status-badge ${statusClass}">${o.status}</span></td>
+              <td><small>${new Date(o.createdAt).toLocaleString()}</small></td>
+              <td style="white-space:nowrap;">
+                <a href="/admin/orders/details/${o._id}" class="btn-primary" style="padding:6px 10px; border-radius:8px; text-decoration:none;">Details</a>
+                <select class="order-status-select" data-id="${o._id}" style="margin-left:8px; padding:6px 8px; border-radius:8px;">
+                  <option ${o.status==='Pending'?'selected':''} value="Pending">Pending</option>
+                  <option ${o.status==='Preparing'?'selected':''} value="Preparing">Preparing</option>
+                  <option ${o.status==='Out for Delivery'?'selected':''} value="Out for Delivery">Out for Delivery</option>
+                  <option ${o.status==='Completed'?'selected':''} value="Completed">Completed</option>
+                  <option ${o.status==='Cancelled'?'selected':''} value="Cancelled">Cancelled</option>
+                </select>
+              </td>`;
+            tbody.prepend(tr);
+            bindStatusSelects(tr);
+            flashRow(tr);
+            beep();
+            if (window.showToast) showToast('New order received');
+            applyFilters();
+          } catch {}
+        });
+      }
+
+      // Initial filter apply to honor default active status
+      applyFilters();
+    })();
+  </script>
+
+  <style>
+    /* subtle row highlight on update */
+    @keyframes rowFlash { from { background: #fff7d6; } to { background: transparent; } }
+    .row-updated { animation: rowFlash 1.2s ease forwards; }
+    @keyframes pulse { 0%{ box-shadow:0 0 0 0 rgba(46,204,113,.7);} 70%{ box-shadow:0 0 0 10px rgba(46,204,113,0);} 100%{ box-shadow:0 0 0 0 rgba(46,204,113,0);} }
+  </style>
 
 </section>

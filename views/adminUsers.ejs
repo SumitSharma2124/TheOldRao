@@ -1,0 +1,97 @@
+<section class="container">
+  <h2 style="margin-bottom:12px;">Admin Users</h2>
+  <p style="margin-bottom:16px; opacity:.8;">Create new admins and manage roles.</p>
+
+  <div class="grid">
+    <div class="card">
+      <h3 style="margin-top:0;">Add New Admin</h3>
+      <form action="/admin/users/add" method="POST" class="add-form">
+        <label>
+          <span>Name*</span>
+          <input type="text" name="name" required placeholder="Full name">
+        </label>
+        <label>
+          <span>Email*</span>
+          <input type="email" name="email" required placeholder="name@example.com">
+        </label>
+        <label>
+          <span>Password*</span>
+          <input type="password" name="password" required placeholder="Set a strong password">
+        </label>
+        <button class="btn-primary" type="submit">Add Admin</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0;">All Users</h3>
+      <table class="reservation-table users-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% users.forEach(u => { const isSelf = String(u._id) === String(selfId); %>
+            <tr>
+              <td><%= u.name %></td>
+              <td><%= u.email %></td>
+              <td><span class="status-badge <%= u.role==='admin' ? 'completed' : 'pending' %>"><%= u.role %></span></td>
+              <td>
+                <% if (u.role !== 'admin') { %>
+                  <div class="row-actions">
+                    <form action="/admin/users/promote/<%= u._id %>" method="POST">
+                      <button class="btn-primary" type="submit">Promote to Admin</button>
+                    </form>
+                  </div>
+                <% } else { %>
+                  <div class="row-actions">
+                    <form action="/admin/users/demote/<%= u._id %>" method="POST">
+                      <button class="btn-secondary" type="submit" <%= (isSelf || adminCount<=1) ? 'disabled' : '' %>>Demote to Customer</button>
+                    </form>
+                  </div>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <style>
+    .grid { display:grid; grid-template-columns: repeat( auto-fit, minmax(280px, 1fr) ); gap:16px; }
+    .card { background:#fff; border:1px solid #eee; border-radius:14px; box-shadow: var(--card-shadow, 0 6px 24px rgba(0,0,0,.06)); padding:16px; }
+    .add-form { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    .add-form label { display:flex; flex-direction:column; }
+    .add-form label span { font-size:12px; opacity:.7; margin-bottom:6px; }
+    .add-form input { padding:10px 12px; border:1px solid #ddd; border-radius:10px; }
+    .add-form button { grid-column: 1 / -1; width:max-content; }
+    @media (max-width: 640px){ .add-form { grid-template-columns: 1fr; } }
+
+    /* Users table alignment tweaks */
+    .users-table { width:100%; }
+    .users-table th, .users-table td { vertical-align: middle; }
+    .users-table th:nth-child(1) { width: 22%; }
+    .users-table th:nth-child(2) { width: 38%; }
+    .users-table th:nth-child(3) { width: 14%; text-align:center; }
+    .users-table th:nth-child(4) { width: 26%; text-align:right; }
+    .users-table td:nth-child(3) { text-transform: capitalize; text-align:center; }
+    .users-table td:nth-child(4) { text-align:right; }
+    .users-table td:nth-child(2) { word-break: break-word; }
+    .users-table .status-badge { display:inline-block; }
+    .row-actions { display:flex; gap:8px; justify-content:flex-end; align-items:center; }
+    .row-actions form { display:inline; }
+    .row-actions button { padding:6px 10px; border-radius:8px; }
+    @media (max-width: 720px){
+      .users-table th:nth-child(1),
+      .users-table th:nth-child(2),
+      .users-table th:nth-child(3),
+      .users-table th:nth-child(4) { width:auto; }
+      .row-actions { justify-content:flex-start; flex-wrap:wrap; }
+      .users-table td:nth-child(4) { text-align:left; }
+    }
+  </style>
+</section>

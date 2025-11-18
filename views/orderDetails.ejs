@@ -1,5 +1,5 @@
 
-<section class="container order-details-page">
+<section id="orderDetailsRoot" class="container order-details-page" data-order-id="<%= order._id %>" data-status="<%= order.status %>">
 
   <h2 class="od-title">Order Details</h2>
 
@@ -9,8 +9,13 @@
   </div>
 
   <!-- Order Timeline -->
-  <div class="timeline-box">
-    <div class="timeline-step <%= order.status !== 'Pending' ? 'active' : '' %>">
+  <div class="timeline-box" style="--timeline-color: <%= (
+      order.status === 'Completed' ? '#2b9348' :
+      order.status === 'Out for Delivery' ? '#C44536' :
+      order.status === 'Preparing' ? '#C44536' :
+      '#C44536'
+    ) %>">
+    <div class="timeline-step active">
       <span class="circle"></span>
       <p>Pending</p>
     </div>
@@ -63,7 +68,7 @@
   <!-- Footer Actions -->
   <div class="order-actions">
     <a href="/my-orders" class="btn-secondary">← Back to Orders</a>
-    <a href="/menu" class="btn-primary reorder-btn">Reorder</a>
+    <button type="button" class="btn-primary reorder-btn" data-orderid="<%= order._id %>">Reorder</button>
   </div>
 
 </section>

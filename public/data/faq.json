@@ -1,0 +1,26 @@
+[
+  {
+    "q": "Do you offer delivery?",
+    "a": "Yes. We deliver within a 6 km radius. Track live status on your order details page."
+  },
+  {
+    "q": "What are your hours?",
+    "a": "Open daily 11:00–23:00. Last delivery order by 22:30."
+  },
+  {
+    "q": "Do you have vegan or gluten-free options?",
+    "a": "We label vegan and GF items in the menu. Ask our team for recommendations."
+  },
+  {
+    "q": "Can I modify a dish?",
+    "a": "We can accomodate mild customizations. Note requests during checkout; we'll confirm if possible."
+  },
+  {
+    "q": "What payment methods do you accept?",
+    "a": "UPI, cards, and cash on delivery/in-restaurant."
+  },
+  {
+    "q": "How do cancellations and refunds work?",
+    "a": "Contact us promptly. If prep hasn't started, we can cancel. Refunds are processed to original method."
+  }
+]

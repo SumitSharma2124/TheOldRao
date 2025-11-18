@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Guest",
+    "rating": 5,
+    "comment": "Loved the butter chicken and the service was prompt!",
+    "date": "2025-11-18T12:00:00.000Z"
+  },
+  {
+    "name": "Saanvi K.",
+    "rating": 5,
+    "comment": "Outstanding flavors! The dal makhani and garlic naan were perfect.",
+    "date": "2025-11-10T18:25:00.000Z"
+  },
+  {
+    "name": "Arnav T.",
+    "rating": 4,
+    "comment": "Great biryani, slightly spicy for me but super aromatic.",
+    "date": "2025-11-08T13:10:00.000Z"
+  },
+  {
+    "name": "Meera P.",
+    "rating": 5,
+    "comment": "Warm service and quick delivery. Paneer tikka was a highlight!",
+    "date": "2025-11-05T19:45:00.000Z"
+  },
+  {
+    "name": "Rohit S.",
+    "rating": 3,
+    "comment": "Tasty overall, but the roti arrived a bit cold this time.",
+    "date": "2025-11-02T20:00:00.000Z"
+  },
+  {
+    "name": "Aisha M.",
+    "rating": 4,
+    "comment": "Loved the lassi! Will reorder for sure.",
+    "date": "2025-10-28T12:35:00.000Z"
+  }
+]

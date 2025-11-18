@@ -1,0 +1,37 @@
+[
+  {
+    "name": "Arjun Mehra",
+    "role": "Head Chef",
+    "bio": "Leads the kitchen with 15+ years crafting North Indian flavors.",
+    "photo": "",
+    "specialty": "Tandoori & slow-cooked gravies"
+  },
+  {
+    "name": "Riya Kapoor",
+    "role": "Sous Chef",
+    "bio": "Keeps the pass moving and plates precise during the rush.",
+    "photo": "",
+    "specialty": "Seasonal vegetables & biryanis"
+  },
+  {
+    "name": "Kabir Sethi",
+    "role": "Pastry Chef",
+    "bio": "Balancing tradition and whimsy in every sweet finish.",
+    "photo": "",
+    "specialty": "Gulab Jamun Cheesecake"
+  },
+  {
+    "name": "Anita Rao",
+    "role": "Restaurant Manager",
+    "bio": "Orchestrates warm service and a seamless dining experience.",
+    "photo": "",
+    "specialty": "Guest delight & operations"
+  },
+  {
+    "name": "Dev Malhotra",
+    "role": "Beverage Lead",
+    "bio": "Pairs plates with house-made coolers and classic mocktails.",
+    "photo": "",
+    "specialty": "Nimbu soda & masala coolers"
+  }
+]

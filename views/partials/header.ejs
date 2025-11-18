@@ -6,23 +6,25 @@
     </div>
 
     <div class="right-actions">
-      <button class="icon-btn" id="cartBtn">🛒</button>
+      <% if (!(typeof session !== 'undefined' && session && session.user && session.user.role === 'admin')) { %>
+        <button class="icon-btn" id="cartBtn" aria-label="Open cart"><i data-lucide="shopping-cart"></i></button>
+      <% } %>
       <div class="user-dropdown-wrapper">
-        <button class="icon-btn" id="userBtn">👤</button>
+        <button class="icon-btn" id="userBtn" aria-label="User menu"><i data-lucide="user"></i></button>
 
         <div class="user-dropdown">
 
-          <% if (session && session.user) { %>
+          <% if (typeof session !== 'undefined' && session && session.user) { %>
 
             <p class="user-name">Hello, <%= session.user.name %></p>
-
-            <a href="/my-orders">My Orders</a>
-            <a href="/logout">Logout</a>
+            <a href="/profile"><i data-lucide="settings" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"></i> Edit Profile</a>
+            <a href="/my-orders"><i data-lucide="list" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"></i> My Orders</a>
+            <a href="/logout"><i data-lucide="log-out" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"></i> Logout</a>
 
           <% } else { %>
 
-            <a href="/login">Login</a>
-            <a href="/signup">Signup</a>
+            <a href="/login"><i data-lucide="log-in" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"></i> Login</a>
+            <a href="/signup"><i data-lucide="user-plus" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"></i> Signup</a>
 
           <% } %>
 

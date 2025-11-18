@@ -1,36 +1,151 @@
 <section class="container">
   <h2>Manage Reservations</h2>
 
-  <table class="reservation-table">
-    <tr>
-      <th>Name</th>
-      <th>Phone</th>
-      <th>Guests</th>
-      <th>Date</th>
-      <th>Time</th>
-      <th>Status</th>
-      <th>Actions</th>
-    </tr>
+  <div class="admin-res-controls">
+    <input type="text" id="resSearch" placeholder="Search name or phone..." aria-label="Search reservations">
+    <input type="date" id="resDate" aria-label="Filter by date">
+    <select id="resStatus" aria-label="Filter by status">
+      <option value="">All Statuses</option>
+      <option value="pending">Pending</option>
+      <option value="confirmed">Confirmed</option>
+      <option value="completed">Completed</option>
+      <option value="cancelled">Cancelled</option>
+    </select>
+    <button id="resClear" class="btn-light" type="button">Clear</button>
+    <button id="resExport" class="btn-primary" type="button">Export CSV</button>
+    <span class="res-count" id="resCount"></span>
+  </div>
 
-    <% reservations.forEach(r => { %>
-      <tr>
-        <td><%= r.name %></td>
-        <td><%= r.phone %></td>
-        <td><%= r.guests %></td>
-        <td><%= r.date %></td>
-        <td><%= r.time %></td>
-        <td><%= r.status %></td>
-        <td>
+  <div class="table-wrap">
+    <table class="reservation-table admin-res-table" id="resTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Phone</th>
+          <th>Guests</th>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% reservations.forEach(r => { %>
+          <tr data-name="<%= (r.name||'').toLowerCase() %>" data-phone="<%= (r.phone||'') %>" data-date="<%= r.date %>" data-status="<%= (r.status||'').toLowerCase() %>">
+            <td><strong><%= r.name %></strong></td>
+            <td><%= r.phone %></td>
+            <td><%= r.guests %></td>
+            <td><%= r.date %></td>
+            <td><%= r.time %></td>
+            <td>
+              <% const st = (r.status||'').toLowerCase(); %>
+              <span class="status-badge <%= st %>"><%= r.status %></span>
+            </td>
+            <td class="actions">
+              <a class="btn-xs btn-secondary" href="/admin/reservations/confirm/<%= r._id %>">Confirm</a>
+              <a class="btn-xs btn-success" href="/admin/reservations/complete/<%= r._id %>">Complete</a>
+              <a class="btn-xs btn-danger" href="/admin/reservations/cancel/<%= r._id %>">Cancel</a>
+              <a class="btn-xs btn-outline" href="/admin/reservations/delete/<%= r._id %>">Delete</a>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
 
-          <a href="/admin/reservations/confirm/<%= r._id %>">Confirm</a> |
-          <a href="/admin/reservations/complete/<%= r._id %>">Complete</a> |
-          <a href="/admin/reservations/cancel/<%= r._id %>">Cancel</a> |
-          <a href="/admin/reservations/delete/<%= r._id %>">Delete</a>
+  <style>
+    .admin-res-controls { display:flex; flex-wrap:wrap; gap:10px; align-items:center; background:#fff; border:1px solid #eee; padding:10px; border-radius:12px; box-shadow: var(--card-shadow); margin:10px 0 14px; }
+    .admin-res-controls input, .admin-res-controls select { padding:8px 10px; border:1px solid #ddd; border-radius:10px; }
+    .btn-primary { padding:8px 12px; border-radius:10px; background: var(--primary); color:#fff; border:1px solid transparent; cursor:pointer; }
+    .btn-light { padding:8px 12px; border-radius:10px; background:#f5f5f5; border:1px solid #e8e8e8; cursor:pointer; }
+    .btn-xs { padding:6px 10px; border-radius:999px; text-decoration:none; display:inline-block; font-size:.85rem; border:1px solid transparent; }
+    .btn-secondary { background:#E3C770; color:#2B2B2B; }
+    .btn-success { background:#2b9348; color:#fff; }
+    .btn-danger { background:#e53935; color:#fff; }
+    .btn-outline { background:#fff; color:#333; border-color:#ddd; }
 
-        </td>
-      </tr>
-    <% }) %>
+    .table-wrap { overflow-x:auto; background:#fff; border-radius:12px; box-shadow: var(--card-shadow); border:1px solid #eee; }
+    .admin-res-table { width:100%; border-collapse: collapse; min-width: 760px; }
+    .admin-res-table th, .admin-res-table td { padding:12px; border-bottom:1px solid #eee; text-align:left; }
+    .admin-res-table thead th { position:sticky; top:0; background:#fafafa; z-index:1; }
+    .admin-res-table tr:hover { background:#fafafa; }
+    .admin-res-table .actions { display:flex; flex-wrap:wrap; gap:6px; }
 
-  </table>
+    .status-badge { padding:6px 10px; border-radius:999px; font-size:.8rem; font-weight:600; color:#fff; text-transform: capitalize; }
+    .status-badge.pending { background:#999; }
+    .status-badge.confirmed { background:#1B4332; }
+    .status-badge.completed { background:#2b9348; }
+    .status-badge.cancelled { background:#c44536; }
+
+    .res-count { margin-left:auto; font-size:.9rem; opacity:.8; }
+
+    @media (max-width: 640px) {
+      .admin-res-controls { gap:8px; }
+      .btn-xs { font-size:.8rem; }
+    }
+
+    /* ensure space above footer */
+    section.container { margin-bottom: 22px; }
+  </style>
+
+  <script>
+    (function(){
+      const table = document.getElementById('resTable');
+      const search = document.getElementById('resSearch');
+      const dateInp = document.getElementById('resDate');
+      const statusSel = document.getElementById('resStatus');
+      const clearBtn = document.getElementById('resClear');
+      const exportBtn = document.getElementById('resExport');
+      const countEl = document.getElementById('resCount');
+
+      function visibleRows(){ return Array.from(table.tBodies[0].rows).filter(r => r.style.display !== 'none'); }
+      function updateCount(){ const vis = visibleRows().length; const total = table.tBodies[0].rows.length; countEl.textContent = `${vis}/${total}`; }
+
+      function matches(r){
+        const q = (search.value || '').toLowerCase().trim();
+        const d = (dateInp.value || '').trim();
+        const s = (statusSel.value || '').toLowerCase().trim();
+        const name = r.dataset.name || '';
+        const phone = (r.dataset.phone || '').toLowerCase();
+        const date = r.dataset.date || '';
+        const status = r.dataset.status || '';
+        let ok = true;
+        if (q) ok = ok && (name.includes(q) || phone.includes(q));
+        if (d) ok = ok && (date.startsWith(d));
+        if (s) ok = ok && (status === s);
+        return ok;
+      }
+
+      function applyFilters(){
+        Array.from(table.tBodies[0].rows).forEach(r => {
+          r.style.display = matches(r) ? '' : 'none';
+        });
+        updateCount();
+      }
+
+      function toCSV(rows){
+        const head = Array.from(table.tHead.rows[0].cells).map(th => '"' + th.innerText.trim().replace(/"/g,'""') + '"').join(',');
+        const body = rows.map(r => Array.from(r.cells).slice(0,6).map(td => '"' + td.innerText.trim().replace(/"/g,'""') + '"').join(',')).join('\n');
+        return head + '\n' + body;
+      }
+
+      function downloadCSV(){
+        const rows = visibleRows();
+        const csv = toCSV(rows);
+        const blob = new Blob([csv], {type:'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'reservations.csv'; a.click(); URL.revokeObjectURL(url);
+      }
+
+      search.addEventListener('input', applyFilters);
+      dateInp.addEventListener('change', applyFilters);
+      statusSel.addEventListener('change', applyFilters);
+      clearBtn.addEventListener('click', ()=>{ search.value=''; dateInp.value=''; statusSel.value=''; applyFilters(); });
+      exportBtn.addEventListener('click', downloadCSV);
+
+      applyFilters();
+    })();
+  </script>
 </section>
 

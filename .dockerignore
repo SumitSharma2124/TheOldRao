@@ -1,0 +1,10 @@
+# Ignore files not needed in the production image
+node_modules
+npm-debug.log
+.git
+.gitignore
+.env
+.DS_Store
+*.md
+public/uploads/menu/*
+# Include uploads at runtime via volume/persistent storage if using local disk
