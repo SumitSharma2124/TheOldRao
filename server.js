@@ -19,14 +19,20 @@ const app = express();
 
 // Environment configuration
 const SESSION_SECRET = process.env.SESSION_SECRET || 'dev_fallback_secret';
-const MONGO_URL = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017/oldrao';
+const MONGO_URL = process.env.MONGO_URL;
 const PORT = process.env.PORT || 3000;
 // Optional debug flag to relax TLS in dev if corporate antivirus/proxy interferes
 const MONGO_TLS_INSECURE = String(process.env.MONGO_TLS_INSECURE || '').toLowerCase() === 'true';
-const mongoClientOptions = {};
-if (MONGO_TLS_INSECURE) {
-  mongoClientOptions.tlsAllowInvalidCertificates = true;
-}
+
+// Recommended explicit mongoose connection options to fail fast and improve logging
+const mongooseClientOptions = {
+  serverSelectionTimeoutMS: 10000, // short timeout to surface network issues quickly
+  socketTimeoutMS: 45000,
+  family: 4, // prefer IPv4 (helps on some networks)
+  // For SRV URIs, TLS is required by Atlas. Keep option explicit.
+  tls: String(MONGO_URL || '').startsWith('mongodb+srv://') ? true : undefined,
+  tlsAllowInvalidCertificates: MONGO_TLS_INSECURE ? true : false,
+};
 
 /* ---------------------------------------------
    TEMPLATE ENGINE
@@ -64,16 +70,24 @@ app.use(express.urlencoded({ extended: true }));
 /* ---------------------------------------------
    DATABASE CONNECTION
 ---------------------------------------------- */
-mongoose
-  .connect(MONGO_URL, mongoClientOptions)
-  .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.log(err));
+// Connect with explicit options and robust logging
+mongoose.connect(MONGO_URL, mongooseClientOptions)
+  .then(() => console.log('MongoDB connected'))
+  .catch((err) => {
+    console.error('MongoDB initial connect error:', err);
+  });
+
+// Connection event handlers for better observability
+mongoose.connection.on('connected', () => console.log('Mongoose connection: connected'));
+mongoose.connection.on('reconnected', () => console.log('Mongoose connection: reconnected'));
+mongoose.connection.on('error', (err) => console.error('Mongoose connection error:', err));
+mongoose.connection.on('disconnected', () => console.warn('Mongoose connection disconnected'));
 
 /* ---------------------------------------------
    SESSION CONFIG
 ---------------------------------------------- */
-// Initialize session store with error handler to avoid process crash on connection errors
-const sessionStore = MongoStore.create({ mongoUrl: MONGO_URL, mongoOptions: mongoClientOptions });
+// Initialize session store with same options used for mongoose connection
+const sessionStore = MongoStore.create({ mongoUrl: MONGO_URL, mongoOptions: mongooseClientOptions });
 sessionStore.on('error', (err) => {
   console.error('Session store error:', err);
 });
@@ -594,7 +608,7 @@ app.get("/api/order/:id", async (req, res) => {
 app.get("/signup", (req, res) => res.render("signup"));
 
 app.post("/signup", async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, location } = req.body;
 
   if (await User.findOne({ email }))
     return res.send("User already exists!");
@@ -603,6 +617,7 @@ app.post("/signup", async (req, res) => {
     name,
     email,
     password: await bcrypt.hash(password, 10),
+    location: location || ''
   });
 
   res.redirect("/login");

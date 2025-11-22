@@ -29,6 +29,7 @@
           <tr>
             <th>Name</th>
             <th>Email</th>
+            <th>Location</th>
             <th>Role</th>
             <th>Actions</th>
           </tr>
@@ -38,6 +39,7 @@
             <tr>
               <td><%= u.name %></td>
               <td><%= u.email %></td>
+              <td><%= u.location || '-' %></td>
               <td><span class="status-badge <%= u.role==='admin' ? 'completed' : 'pending' %>"><%= u.role %></span></td>
               <td>
                 <% if (u.role !== 'admin') { %>

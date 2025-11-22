@@ -22,6 +22,12 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: "customer",   // "admin" or "customer"
   }
+  ,
+  location: {
+    type: String,
+    required: false,
+    default: ''
+  }
 });
 
 module.exports = mongoose.model("User", UserSchema);
